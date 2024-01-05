@@ -1,9 +1,8 @@
-package dk.dtu;
+package dk.dtu.PokerGame;
 
 public enum Suit {
     Hearts,
     Diamonds,
     Spades,
-    Clubs,
+    Clubs
 }
-

@@ -1,19 +1,19 @@
-package dk.dtu;
+package dk.dtu.PokerGame;
 
 import java.util.List;
 import java.util.ArrayList;
+
 
 public class Board {
     int round;
     Player[] players;
     int pot;
-    private static List<Card> communityCards;
+    List<Card> communityCards;
     Player dealer;
     Player smallBlind;
     Player bigBlind;
-    private static Deck deck;
-    private static GameState state;
-    
+    Deck deck;
+    GameState state;
     public Board(int round, Player[] players) {
         this.round = round;
         this.players = players;
@@ -22,13 +22,27 @@ public class Board {
         this.communityCards = new ArrayList<Card>();
         this.deck = new Deck();
     }    
-
     public void setDealerAndBlinds(int round){
+        
         if (round % 3 == 0) {
             this.players[0] = smallBlind;
             this.players[1] = bigBlind;
             this.players[2] = dealer;
         }
+
+        if (round % 3 == 1) {
+            this.players[2] = smallBlind;
+            this.players[1] = bigBlind;
+            this.players[0] = dealer;
+        }
+         
+        if (round % 3 == 2) {
+            this.players[1] = smallBlind;
+            this.players[2] = bigBlind;
+            this.players[0] = dealer;
+        }
+        
+        
     }
 
     public void dealCards(){
@@ -37,8 +51,9 @@ public class Board {
         }
 
     }
+
     
-    public static void addCommunityCards() {
+    public void addCommunityCards() {
         switch (state) {
             case PreFlop:
                 communityCards.addAll(deck.draw(3));
@@ -52,12 +67,13 @@ public class Board {
             default:
                 break;
         }
-        //this.communityCards.
     }
-    public void setPotValue() {
+    public void setPotValue(int value) {
+        this.pot=value;
 
-        
     }
+
+
     public void increasePot(int value) {
         this.pot += value;
     }
@@ -66,4 +82,8 @@ public class Board {
         return this.pot;
     }
 
+    public int resetPotValue() {
+        this.pot=0;
+        return this.pot;
+    }
 }

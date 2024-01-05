@@ -1,4 +1,4 @@
-package dk.dtu;
+package dk.dtu.PokerGame;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +12,7 @@ public class Deck {
     public Deck() {
         cards = new ArrayList<Card>();
         for (Suit suit : Suit.values()) {
-            for (int val = 1; val < 14; val++) {
+            for (int val = 2; val < 15; val++) {
                 cards.add(new Card(val, suit));
             }
         }
@@ -24,14 +24,14 @@ public class Deck {
 		Collections.shuffle(cards);
     }
 
-    public static List<Card> draw(int nCards) {
+    public List<Card> draw(int nCards) {
         List<Card> drawnCards = cards.subList(cards.size() - nCards - usedCards, cards.size() - usedCards);
         usedCards += nCards;
         return drawnCards;
     }
 
-    public static int  getRemainingDeckSize () {
-        return 52-usedCards;
+    public static int getRemainingDeckSize() {
+        return 52 - usedCards;
     }
 
 }
