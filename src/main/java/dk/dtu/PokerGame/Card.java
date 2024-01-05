@@ -22,9 +22,10 @@ public class Card implements Comparable<Card> {
         this.suit = suit;
         }
     
+        
      public String toString(){
         String valueStr;
-        switch (value) {
+        switch (this.value) {
             case 2: valueStr = "Two";
                 break;
             case 3: valueStr = "Three";

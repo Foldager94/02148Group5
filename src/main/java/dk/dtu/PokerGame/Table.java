@@ -9,5 +9,10 @@ public class Table {
         this.board = new Board(this.round, this.players);
     }
     
+    public void newRound() {
+        this.round+=1;
+    }
+
+
 }
 
