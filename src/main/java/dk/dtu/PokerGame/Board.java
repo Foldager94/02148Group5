@@ -23,35 +23,31 @@ public class Board {
         this.deck = new Deck();
     }    
     public void setDealerAndBlinds(int round){
-        
+
         if (round % 3 == 0) {
             this.players[0] = smallBlind;
             this.players[1] = bigBlind;
             this.players[2] = dealer;
         }
 
-        if (round % 3 == 1) {
+        else if (round % 3 == 1) {
             this.players[2] = smallBlind;
             this.players[1] = bigBlind;
             this.players[0] = dealer;
         }
          
-        if (round % 3 == 2) {
+       else if (round % 3 == 2) {
             this.players[1] = smallBlind;
             this.players[2] = bigBlind;
             this.players[0] = dealer;
         }
-        
-        
     }
-
     public void dealCards(){
         for(Player p : players) {
             p.setHoleCards(deck.draw(2));
         }
 
     }
-
     
     public void addCommunityCards() {
         switch (state) {
@@ -73,7 +69,6 @@ public class Board {
 
     }
 
-
     public void increasePot(int value) {
         this.pot += value;
     }
@@ -86,4 +81,7 @@ public class Board {
         this.pot=0;
         return this.pot;
     }
+
+   
+
 }
