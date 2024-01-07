@@ -1,28 +1,43 @@
 package dk.dtu.client;
 
+import org.jspace.ActualField;
+import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
-
+import java.util.UUID;
 public class ClientMain {
     public static void main(String[] args) {
         try {
-
             BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-
             // Set the URI of the chat space
             // Default value
             System.out.print("Enter URI of the chat server or press enter for default: ");
-            String uri = "tcp://127.0.0.1:9001/chat?keep";
-
+            String uri = "tcp://127.0.0.1:9001";
+            //  String uri = "tcp://127.0.0.1:9001/chat?keep";
             // Connect to the remote chat space
-            System.out.println("Connecting to chat space " + uri + "...");
-            RemoteSpace chat = new RemoteSpace(uri);
+            System.out.println("Connecting to spaces " + uri + "...");
+            RemoteSpace chat = new RemoteSpace(uri+"/chat?keep");
+            RemoteSpace players = new RemoteSpace(uri +"/players?keep");
+            RemoteSpace game = new RemoteSpace(uri+"/game?keep");
+            UUID uuid = UUID.randomUUID();
             System.out.print("Enter your name: ");
-            String name = input.readLine();
+            String name;
+
+            while (true) {
+                name = input.readLine();
+                players.put("insertName", uuid.toString(), name);
+                System.err.println("Name inserted");
+                Object[] isOk = players.get(new ActualField("isNameOk"), new ActualField(uuid.toString()), new FormalField(Boolean.class));
+                Boolean ok = (boolean)isOk[2];
+                System.out.println(ok);
+                if (ok) { break; }
+                System.out.println("Name is already chosen, choose a new name:");   
+            }
+
             ChatClient chatClient = new ChatClient(chat, name);
             // Read user name from the console
 
@@ -33,7 +48,6 @@ public class ClientMain {
                 chatClient.sendMessage(message);
             }
 
-
         } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -41,7 +55,5 @@ public class ClientMain {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-
     }
 }
