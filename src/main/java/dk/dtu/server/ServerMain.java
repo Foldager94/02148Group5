@@ -8,13 +8,16 @@ import java.util.Map;
 import java.util.HashMap;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.URI;
 
 public class ServerMain {
     public static void main(String[] args) {
         try {
+            System.out.println(InetAddress.getLocalHost());
+
             BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-            String uri = "tcp://127.0.0.1:9001/?keep";
+            String uri = "tcp://localhost:9001/?keep";
             URI myUri = new URI(uri);
             String gateUri = "tcp://" + myUri.getHost() + ":" + myUri.getPort() +  "?keep" ;
 

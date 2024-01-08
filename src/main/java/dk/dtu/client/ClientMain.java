@@ -26,6 +26,7 @@ public class ClientMain {
             UUID uuid = UUID.randomUUID();
             System.out.print("Enter your name: ");
             String name;
+            System.out.println(uuid.toString());
 
             while (true) {
                 name = input.readLine();
