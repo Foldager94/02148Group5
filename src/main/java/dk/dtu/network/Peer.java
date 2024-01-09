@@ -11,83 +11,99 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.github.cdimascio.dotenv.DotenvException;
 
 public class Peer {
-    String name;
-    SequentialSpace chat; // Own chat
-    SpaceRepository chatResp; // repository for the peers own chat
+    public String name;
+    public SequentialSpace chat; // Own chat
+    public SpaceRepository remoteResp; // the peers remote repository(s)
 
-    SequentialSpace peers; // (id, name, uri)
-    SpaceRepository chats;  // containts all chats to the other peers
+    public SequentialSpace peers; // (id, name, uri)
+    public SpaceRepository chats;  // containts all chats to the other peers
 
-    String MPIP = "10.209.157.221";
-    String MPPort = "9001";
-    int MPID;
-    String ip;
-    String port;
-    String uri;
-    String id;
+    public String MPIP = "192.168.0.104";
+    public String MPPort = "9004";
+    public int MPID;
+    public String ip;
+    public String port;
+    public String uri;
+    public String id;
     
-    RemoteSpace requests;
-    RemoteSpace ready;
+    public RemoteSpace requests;
+    public RemoteSpace ready;
 
 
-    public Peer(String name) {
+    public Peer(String name, String port) {
         this.name = name;
-    }
-    private void setIpAndPort() {
-        try {
-            Dotenv dotenv = null;
-            dotenv = Dotenv.configure().load();
-            System.out.println(dotenv.get("MPIP"));
-            
-            ip = Inet4Address.getLocalHost().getHostAddress(); // trim
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        port = "9001";
+        this.port = port;
+        setIpAndPort();
+        initSpaces();
     }
 
-    private void connectToMP() {
+    public void setIpAndPort() {
         try {
-            requests = new RemoteSpace(formatURI(MPIP, MPPort) + "/requests?keep");
-            ready = new RemoteSpace(formatURI(MPIP, MPPort) + "/ready?keep");
-            requests.put("helo", name, formatURI(ip, port));
-            Object[] obj = requests.get(
-                new ActualField("helo"), 
-                new FormalField(String.class), // peer id
-                new FormalField(String.class), // MP uri
-                new FormalField(Object.class) // peers (name, id, uri)[]
-            );
-            id = (String)obj[1];
-            String[][] peerArray = (String[][])obj[3];
-            for (String[] peer : peerArray) {
-                String id   = peer[0];
-                String name = peer[1];
-                String uri  = peer[2];
-                peers.put(id, name, uri);
-                chats.add(id, new RemoteSpace(uri + "/chat?keep")); 
-            }
+            // Dotenv dotenv = null;
+            // dotenv = Dotenv.configure().load();
+            // System.out.println(dotenv.get("MPIP"));
+            ip = Inet4Address.getLocalHost().getHostAddress().toString();
+            // port = "9002";
         } catch (Exception e) {}
     }
 
-    private void initSpaces() {
+    public void connectToMP() {
+        try {
+            requests = new RemoteSpace(formatURI(MPIP, MPPort) + "/requests?keep");
+            ready = new RemoteSpace(formatURI(MPIP, MPPort) + "/ready?keep");
+            requests.put("Helo", name, formatURI(ip, port));
+            
+            Object[] obj = requests.get(
+                new ActualField("Helo"), 
+                new FormalField(String.class), // Mp id
+                new FormalField(String.class), // peer id
+                new FormalField(LinkedList.class), // peers (name, id, uri)[]
+                new FormalField(String.class)
+            );
+            //("Helo", this.id, peerId, peers, info[2]);
+            id = (String)obj[2];
+            
+            peers.put(id, this.name, obj[4]);
+
+            //String[][] peerArray = (String[][])obj[3];
+            LinkedList<ArrayList> peerList = (LinkedList<ArrayList>)obj[3];
+            // {Id, Name, Ip:port}
+            for (ArrayList peer : peerList) {
+                System.out.println(peer.toString());
+                String peerId   = (String)peer.get(0);
+                String peerName = (String)peer.get(1);
+                String peerUri  = (String)peer.get(2);
+                peers.put(peerId, peerName, peerUri);
+                System.out.println("Trying to connect to: " + peerUri);
+                chats.add(peerId, new RemoteSpace(peerUri + "/chat?keep")); 
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void initSpaces() {
         try {
             chat = new SequentialSpace();
-            chatResp = new SpaceRepository();
-            chatResp.add("chat", chat);
-            chatResp.addGate(formatURI(ip, port) + "/chatResp?keep");
+            remoteResp = new SpaceRepository();
+            remoteResp.add("chat", chat);
+            remoteResp.addGate(formatURI(ip, port) + "/?keep");
             peers = new SequentialSpace();
             
             chats = new SpaceRepository();
-        } catch(Exception e) {}
+        } catch(Exception e) {System.out.println(e.getStackTrace());}
     }
-    // for each of it's pear, send a introduction message to the pears chat  
-    private void sendIntroduction() {  
+
+    // for each of its peers, send a introduction message to the peers chat  
+    public void sendIntroduction() {  
         try {
             List<Object[]> objs = peers.queryAll(
                 new FormalField(String.class), // id
@@ -95,8 +111,11 @@ public class Peer {
                 new FormalField(String.class) // uri
             );
             for (Object[] obj : objs) {
-                String id = (String)obj[1];
-                chats.get(id).put("intro", id, name, ip);
+                String peerId = (String)obj[0];
+                
+                if (peerId == this.id) { continue; } // ignore itself
+                System.out.println("Sending introduction to: " + peerId);
+                chats.get(peerId).put("intro", this.id, name, formatURI(ip, port));
                 String name = (String)obj[2];
                 peers.put("welcome", name);
             }
@@ -104,8 +123,9 @@ public class Peer {
         }
         catch(Exception e) {}
     }
+
     // look in the peers chat for new introductions
-    private void getIntroduction() {
+    public void getIntroduction() {
         new Thread(() -> {
             try {
                 while (true) {
@@ -115,20 +135,25 @@ public class Peer {
                         new FormalField(String.class), // name
                         new FormalField(String.class) // uri
                     );
-                    String id = (String)obj[1];
-                    String uri = (String)obj[3];
-                    chats.add(id, new RemoteSpace(uri + "/chat?keep"));
+                    System.out.println("recieved introduction");
+                    String peerId = (String)obj[1];
+                    String peerUri = (String)obj[3];
+                    System.out.println(obj[1] + " " + obj[2] + " " + obj[3]);
+                    peers.put(obj[1], obj[2], obj[3]);
+                    chats.add(peerId, new RemoteSpace(peerUri + "/chat?keep"));
                 }
             } catch (Exception e) {}
         }).start();
     }
     
     // Create a new thread when a message is received and store
-    private void startMessageReciever() { 
+    public void startMessageReciever() { 
         new Thread(() -> {
+            System.out.println("startMessageReciever is running");
             while (true) {
                 try {
-                    Object[] messageTuple = chatResp.get("chat").get(
+                    //Object[] messageTuple = remoteResp.get("chat").get(
+                    Object[] messageTuple = chat.get(
                         new FormalField(String.class), // sender 
                         new FormalField(String.class), // message
                         new FormalField(Boolean.class) // isAllChat
@@ -142,24 +167,36 @@ public class Peer {
                 }
             }
         }).start();
-    }    
+    }
     
-    private void sendMessage(String message, String recieverID) {
+    public void sendMessage(String message, String recieverID, Boolean isAllChat) {
         try {
-            chats.get(recieverID).put(message, recieverID);
+            chats.get(recieverID).put(this.name, message, isAllChat);
         }
         catch(Exception e) {}
     }
 
-    private String formatURI(String ip, String port) {
-        return "tcp://" +  ip + "/" + port;
+    public void sendGlobalMessage(String message) {
+        List<Object[]> objs = peers.queryAll(
+            new FormalField(String.class), // id
+            new FormalField(String.class), // name
+            new FormalField(String.class) // uri
+        );
+        for (Object[] obj : objs) {
+            String id = (String)obj[0];
+            if (id == this.id) { continue; } // ignore itfels
+            sendMessage(message, id, true);
+        }
     }
 
-    private void sendReadyFlag(boolean isReady) {
+    public String formatURI(String ip, String port) {
+        return "tcp://" +  ip + ":" + port;
+    }
+
+    public void sendReadyFlag(boolean isReady) {
         try {
             ready.put("ready", id, isReady); 
         }
         catch (Exception e) {}
-
-    }    
+    }
 }

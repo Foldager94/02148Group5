@@ -1,4 +1,4 @@
-package dk.dtu.server;
+package dk.dtu.noter;
 import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.SequentialSpace;

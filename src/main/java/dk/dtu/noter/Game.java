@@ -1,4 +1,4 @@
-package dk.dtu.client;
+package dk.dtu.noter;
 
 public class Game extends Thread {
 

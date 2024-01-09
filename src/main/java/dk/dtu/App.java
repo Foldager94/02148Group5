@@ -4,24 +4,69 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import dk.dtu.network.MasterPeer;
+import dk.dtu.network.Peer;
 
 public class App 
 {
     public static void main( String[] args ) throws IOException
     {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Do you want to host (h) or join (j) a pokergame");
+        System.out.println("Input your name:");
+        String name = input.readLine();
+        System.out.println("Input port:");
+        String port = input.readLine();
+        System.out.println("Hello "+name+" do you want to host (h) or join (j) a poker game?");
+
         System.out.println("Press h or j");
-        String c = input.readLine();
-        switch (c) {
-            case "h":
-                System.out.println("hosting");
-                break;
-            case "j":
-                System.out.println("joining");
-                break;
-            default:
-                break;
+        while (true){
+            String c = input.readLine();
+            switch (c) {
+                case "h":
+                    System.out.println("hosting");
+                    initMp(name);
+                    break;
+                case "j":
+                    System.out.println("joining");
+                    initP(name, port);
+                    break;
+                default:
+                    System.out.println("Error: Pick between h or j");
+            }
         }
     }
+    
+    private static void initMp(String name) throws IOException{
+        MasterPeer mp = new MasterPeer(name);
+        mp.awaitLobbyRequest();
+        mp.awaitReadyFlags();
+        mp.getIntroduction();
+        mp.startMessageReciever();
+                while(true) {
+            BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+            mp.sendGlobalMessage(input.readLine());
+        }
+    }
+
+    private static void initP(String name, String port) throws IOException {
+        Peer p = new Peer(name, port);
+        p.connectToMP();
+        p.sendIntroduction();
+        p.getIntroduction();
+        p.startMessageReciever();
+        p.sendGlobalMessage("Det Virker");
+        while(true) {
+            BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+            p.sendGlobalMessage(input.readLine());
+        }
+    }
+
+    private static void printPeerData(Peer peer){
+        System.out.println(peer.ip);
+        System.out.println(peer.port);
+
+    }
+
+    
+
 }

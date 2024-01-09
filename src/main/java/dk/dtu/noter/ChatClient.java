@@ -1,4 +1,4 @@
-package dk.dtu.client;
+package dk.dtu.noter;
 
 import org.jspace.ActualField;
 import org.jspace.FormalField;
