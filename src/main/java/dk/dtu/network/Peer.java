@@ -17,15 +17,14 @@ import java.util.List;
 
 public class Peer {
 
-    public ChatClient chatO;
+    public ChatClient chat;
     public String name;
     //public SequentialSpace chat; // Own chat
     public SpaceRepository remoteResp; // the peers remote repository(s)
-
     public SequentialSpace peers; // (id, name, uri)
-    //public SpaceRepository chats;  // containts all chats to the other peers
+    //public SpaceRepository chats;  // contains all chats to the other peers
 
-    public String MPIP = "192.168.0.104";
+    public String MPIP = "192.168.0.30";
     public String MPPort = "9004";
     public int MPID;
     public String ip;
@@ -83,7 +82,7 @@ public class Peer {
                 String peerUri  = (String)peer.get(2);
                 peers.put(peerId, peerName, peerUri);
                 System.out.println("Trying to connect to: " + peerUri);
-                chatO.addChatToRepo(peerId,peerUri);
+                chat.addChatToRepo(peerId,peerUri);
                 //chats.add(peerId, new RemoteSpace(peerUri + "/chat?keep")); 
             }
         } catch (Exception e) {
@@ -95,10 +94,10 @@ public class Peer {
         try {
             //chat = new SequentialSpace();
             remoteResp = new SpaceRepository();
-            remoteResp.add("chat", chatO.getChat());
+            remoteResp.add("chat", chat.getChat());
             remoteResp.addGate(formatURI(ip, port) + "/?keep");
             peers = new SequentialSpace();
-        } catch(Exception e) {System.out.println(e.getStackTrace());}
+        } catch(Exception e) {System.out.println(e.getMessage());}
     }
 
     // for each of its peers, send a introduction message to the peers chat  
@@ -114,10 +113,10 @@ public class Peer {
                 
                 if (peerId == this.id) { continue; } // ignore itself
                 
-                chatO.getPeerChat(peerId).put("intro", this.id, name, formatURI(ip, port));
+                chat.getPeerChat(peerId).put("intro", this.id, name, formatURI(ip, port));
             }
         }
-        catch(Exception e) {}
+        catch(Exception e) {System.out.println(e.getMessage());}
     }
 
     // look in the peers chat for new introductions
@@ -125,7 +124,7 @@ public class Peer {
         new Thread(() -> {
             try {
                 while (true) {
-                    Object[] obj = chatO.getChat().get(
+                    Object[] obj = chat.getChat().get(
                         new ActualField("intro"), 
                         new FormalField(String.class), // id
                         new FormalField(String.class), // name
@@ -136,10 +135,10 @@ public class Peer {
                     String peerUri = (String)obj[3];
                     System.out.println(obj[1] + " " + obj[2] + " " + obj[3]);
                     peers.put(obj[1], obj[2], obj[3]);
-                    chatO.addChatToRepo(peerId,peerUri);
+                    chat.addChatToRepo(peerId,peerUri);
                     //chats.add(peerId, new RemoteSpace(peerUri + "/chat?keep"));
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {System.out.println(e.getMessage());}
         }).start();
     }
 
@@ -151,7 +150,7 @@ public class Peer {
         try {
             ready.put("ready", id, isReady); 
         }
-        catch (Exception e) {}
+        catch (Exception e) {System.out.println(e.getMessage());}
     }
 
     public List<String> getPeerIds(){
@@ -170,17 +169,16 @@ public class Peer {
     }
 
     public void initChatClient(){
-        chatO = new ChatClient(this);
+        chat = new ChatClient(this);
     }
 
     public void startMessageReciever(){
-        chatO.startMessageReciever();
+        chat.startMessageReciever();
     }
 
-    public void sendGlobalMessage()  {
-
-        
-        
+    public String getPeerName(String peerId) throws InterruptedException {
+        Object[] peerTuple = peers.query(new ActualField(peerId), new FormalField(String.class), new FormalField(String.class));
+        return (String)peerTuple[1];
     }
 
     public void commandHandler() throws IOException{
@@ -189,10 +187,10 @@ public class Peer {
         String[] commandTag = command.split(" ");
         switch (commandTag[0]) {
             case "/p":
-                chatO.chatHandler(command);
+                chat.chatHandler(command);
                 break;
             case "/c":
-            chatO.chatHandler(command);
+            chat.chatHandler(command);
                 break;
             case "/g":
                 //Game handler

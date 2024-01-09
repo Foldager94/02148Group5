@@ -3,7 +3,6 @@ package dk.dtu;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import dk.dtu.chat.ChatClient;
 
 import dk.dtu.network.MasterPeer;
 import dk.dtu.network.Peer;
@@ -15,8 +14,6 @@ public class App
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Input your name:");
         String name = input.readLine();
-        System.out.println("Input port:");
-        String port = input.readLine();
         System.out.println("Hello "+name+" do you want to host (h) or join (j) a poker game?");
 
         System.out.println("Press h or j");
@@ -28,6 +25,8 @@ public class App
                     initMp(name);
                     break;
                 case "j":
+                    System.out.println("Input port:");
+                    String port = input.readLine();
                     System.out.println("joining");
                     initP(name, port);
                     break;

@@ -1,5 +1,6 @@
 package dk.dtu.chat;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.jspace.FormalField;
@@ -24,7 +25,7 @@ public class ChatClient {
         this.peer = peer;
     }
 
-    public void startMessageReciever() { 
+    public void startMessageReciever() {
         new Thread(() -> {
             while (true) {
                 try {
@@ -33,11 +34,15 @@ public class ChatClient {
                         new FormalField(String.class), // message
                         new FormalField(Boolean.class) // isAllChat
                     );
-                    String sender = (String) messageTuple[0]; // its id
+                    String senderId = (String) messageTuple[0]; // its id
+                    String senderName = peer.getPeerName(senderId);
                     String message = (String) messageTuple[1];
-                    System.out.println(sender + ": " + message);
+                    String privateOrPublic = (Boolean) messageTuple[2] ? "Global" : "Private";
+                    System.out.println(privateOrPublic + " "+ senderName + "#"+ senderId + ": " + message);
                 } catch (InterruptedException e) {
+                    System.out.println(e.getMessage());
                     Thread.currentThread().interrupt();
+
                     return;
                 }
             }
@@ -48,11 +53,15 @@ public class ChatClient {
         try {
             chats.get(recieverID).put(peer.id, message, isAllChat);
         }
-        catch(Exception e) {}
+        catch(Exception e) {System.out.println(e.getMessage());}
     }
 
     public void sendGlobalMessage(String message, List<String> ids) {
         for (String recieverID : ids) {
+            if(recieverID.equals(peer.id)){
+                continue;
+            }
+            System.out.println(recieverID);
             sendMessage(message, recieverID, true);
         }
     }
@@ -76,10 +85,13 @@ public class ChatClient {
 
     public void chatHandler(String command) {
         String[] commandTag = command.split(" ");
-        if (commandTag[0] == "/p") {
-            sendMessage(commandTag[2], commandTag[1], false);
-        } else if (commandTag[0] == "/c") {
-            sendGlobalMessage(commandTag[1], peer.getPeerIds());
+        String message;
+        if (commandTag[0].equals("/p")) {
+            message = String.join(" ", Arrays.copyOfRange(commandTag, 2, commandTag.length));
+            sendMessage(message, commandTag[1], false);
+        } else if (commandTag[0].equals("/c")) {
+            message = String.join(" ", Arrays.copyOfRange(commandTag, 1, commandTag.length));
+            sendGlobalMessage(message, peer.getPeerIds());
         }
     }
 }

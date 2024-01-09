@@ -102,7 +102,7 @@ public class MasterPeer extends Peer {
     public void initSpaces() {
         try {
             remoteResp = new SpaceRepository();
-            remoteResp.add("chat", chatO.getChat());
+            remoteResp.add("chat", chat.getChat());
             peers = new SequentialSpace();
             
             MPrequests = new SequentialSpace();
