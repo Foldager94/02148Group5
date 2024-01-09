@@ -3,6 +3,7 @@ package dk.dtu;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import dk.dtu.chat.ChatClient;
 
 import dk.dtu.network.MasterPeer;
 import dk.dtu.network.Peer;
@@ -42,9 +43,8 @@ public class App
         mp.awaitReadyFlags();
         mp.getIntroduction();
         mp.startMessageReciever();
-                while(true) {
-            BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-            mp.sendGlobalMessage(input.readLine());
+        while(true) {
+            mp.commandHandler();
         }
     }
 
@@ -54,19 +54,15 @@ public class App
         p.sendIntroduction();
         p.getIntroduction();
         p.startMessageReciever();
-        p.sendGlobalMessage("Det Virker");
         while(true) {
-            BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-            p.sendGlobalMessage(input.readLine());
+            p.commandHandler();
         }
     }
 
     private static void printPeerData(Peer peer){
         System.out.println(peer.ip);
         System.out.println(peer.port);
-
     }
-
     
 
 }

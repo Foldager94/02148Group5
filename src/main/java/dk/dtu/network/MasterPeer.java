@@ -98,33 +98,20 @@ public class MasterPeer extends Peer {
         }
     }
 
-    // TODO: Implement spaces from MasterPeer
-    // @Override
-    // public void initSpaces() {
-    //     super.initSpaces();
-    //     try {
-    //         remoteResp.add("requests", requests);
-    //         remoteResp.add("readyFlags", readyFlags);
-    //     } catch(Exception e) {
-    //         System.out.println("MP initSpaces: " +e.getMessage());
-    //     }
-    // }
     @Override
     public void initSpaces() {
         try {
-            chat = new SequentialSpace();
             remoteResp = new SpaceRepository();
-            remoteResp.add("chat", chat);
+            remoteResp.add("chat", chatO.getChat());
             peers = new SequentialSpace();
             
-            chats = new SpaceRepository();
             MPrequests = new SequentialSpace();
             MPreadyFlags = new SequentialSpace();
             remoteResp.add("requests", MPrequests);
             remoteResp.add("ready", MPreadyFlags);
             remoteResp.addGate(formatURI(ip, port) + "/?keep");
         } catch(Exception e) {
-            System.out.println("MP initSpaces: " +e.getMessage());
+            System.out.println("MP initSpaces: " + e.getMessage());
         }
     }
 

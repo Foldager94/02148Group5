@@ -1,30 +1,29 @@
 package dk.dtu.network;
-
+import dk.dtu.chat.ChatClient;
 import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
-import org.jspace.Space;
 import org.jspace.SequentialSpace;
 import org.jspace.SpaceRepository;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Inet4Address;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
-import io.github.cdimascio.dotenv.Dotenv;
-import io.github.cdimascio.dotenv.DotenvException;
+
 
 public class Peer {
+
+    public ChatClient chatO;
     public String name;
-    public SequentialSpace chat; // Own chat
+    //public SequentialSpace chat; // Own chat
     public SpaceRepository remoteResp; // the peers remote repository(s)
 
     public SequentialSpace peers; // (id, name, uri)
-    public SpaceRepository chats;  // containts all chats to the other peers
+    //public SpaceRepository chats;  // containts all chats to the other peers
 
     public String MPIP = "192.168.0.104";
     public String MPPort = "9004";
@@ -42,6 +41,7 @@ public class Peer {
         this.name = name;
         this.port = port;
         setIpAndPort();
+        initChatClient();
         initSpaces();
     }
 
@@ -83,7 +83,8 @@ public class Peer {
                 String peerUri  = (String)peer.get(2);
                 peers.put(peerId, peerName, peerUri);
                 System.out.println("Trying to connect to: " + peerUri);
-                chats.add(peerId, new RemoteSpace(peerUri + "/chat?keep")); 
+                chatO.addChatToRepo(peerId,peerUri);
+                //chats.add(peerId, new RemoteSpace(peerUri + "/chat?keep")); 
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,13 +93,11 @@ public class Peer {
 
     public void initSpaces() {
         try {
-            chat = new SequentialSpace();
+            //chat = new SequentialSpace();
             remoteResp = new SpaceRepository();
-            remoteResp.add("chat", chat);
+            remoteResp.add("chat", chatO.getChat());
             remoteResp.addGate(formatURI(ip, port) + "/?keep");
             peers = new SequentialSpace();
-            
-            chats = new SpaceRepository();
         } catch(Exception e) {System.out.println(e.getStackTrace());}
     }
 
@@ -114,12 +113,9 @@ public class Peer {
                 String peerId = (String)obj[0];
                 
                 if (peerId == this.id) { continue; } // ignore itself
-                System.out.println("Sending introduction to: " + peerId);
-                chats.get(peerId).put("intro", this.id, name, formatURI(ip, port));
-                String name = (String)obj[2];
-                peers.put("welcome", name);
+                
+                chatO.getPeerChat(peerId).put("intro", this.id, name, formatURI(ip, port));
             }
-            // peers.put("Welcome", name);
         }
         catch(Exception e) {}
     }
@@ -129,7 +125,7 @@ public class Peer {
         new Thread(() -> {
             try {
                 while (true) {
-                    Object[] obj = chat.get(
+                    Object[] obj = chatO.getChat().get(
                         new ActualField("intro"), 
                         new FormalField(String.class), // id
                         new FormalField(String.class), // name
@@ -140,53 +136,11 @@ public class Peer {
                     String peerUri = (String)obj[3];
                     System.out.println(obj[1] + " " + obj[2] + " " + obj[3]);
                     peers.put(obj[1], obj[2], obj[3]);
-                    chats.add(peerId, new RemoteSpace(peerUri + "/chat?keep"));
+                    chatO.addChatToRepo(peerId,peerUri);
+                    //chats.add(peerId, new RemoteSpace(peerUri + "/chat?keep"));
                 }
             } catch (Exception e) {}
         }).start();
-    }
-    
-    // Create a new thread when a message is received and store
-    public void startMessageReciever() { 
-        new Thread(() -> {
-            System.out.println("startMessageReciever is running");
-            while (true) {
-                try {
-                    //Object[] messageTuple = remoteResp.get("chat").get(
-                    Object[] messageTuple = chat.get(
-                        new FormalField(String.class), // sender 
-                        new FormalField(String.class), // message
-                        new FormalField(Boolean.class) // isAllChat
-                    );
-                    String sender = (String) messageTuple[0];
-                    String message = (String) messageTuple[1];
-                    System.out.println(sender + ": " + message);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-            }
-        }).start();
-    }
-    
-    public void sendMessage(String message, String recieverID, Boolean isAllChat) {
-        try {
-            chats.get(recieverID).put(this.name, message, isAllChat);
-        }
-        catch(Exception e) {}
-    }
-
-    public void sendGlobalMessage(String message) {
-        List<Object[]> objs = peers.queryAll(
-            new FormalField(String.class), // id
-            new FormalField(String.class), // name
-            new FormalField(String.class) // uri
-        );
-        for (Object[] obj : objs) {
-            String id = (String)obj[0];
-            if (id == this.id) { continue; } // ignore itfels
-            sendMessage(message, id, true);
-        }
     }
 
     public String formatURI(String ip, String port) {
@@ -198,5 +152,56 @@ public class Peer {
             ready.put("ready", id, isReady); 
         }
         catch (Exception e) {}
+    }
+
+    public List<String> getPeerIds(){
+        List<Object[]> objs = peers.queryAll(
+            new FormalField(String.class), // id
+            new FormalField(String.class), // name
+            new FormalField(String.class) // uri
+        );
+
+        List<String> ids = new ArrayList<>();
+
+        for(Object[] obj : objs){
+            ids.add((String)obj[0]);
+        }
+        return ids;
+    }
+
+    public void initChatClient(){
+        chatO = new ChatClient(this);
+    }
+
+    public void startMessageReciever(){
+        chatO.startMessageReciever();
+    }
+
+    public void sendGlobalMessage()  {
+
+        
+        
+    }
+
+    public void commandHandler() throws IOException{
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        String command = input.readLine();
+        String[] commandTag = command.split(" ");
+        switch (commandTag[0]) {
+            case "/p":
+                chatO.chatHandler(command);
+                break;
+            case "/c":
+            chatO.chatHandler(command);
+                break;
+            case "/g":
+                //Game handler
+            default:
+                System.err.println("Unknow command.");
+                System.err.println("/p for private message");
+                System.err.println("/c for global chat message");
+                System.err.println("/g for game commands");
+                break;
+        }
     }
 }
