@@ -8,15 +8,8 @@ import java.util.LinkedList;
 public class MasterPeer extends Peer {
     final SequentialSpace requests = new SequentialSpace();
     final SequentialSpace readyFlags = new SequentialSpace();
+    
     private int idTracker = 0;
-
-    // TODO: Redundant from peer class. Delete when merged
-    final SequentialSpace peers = new SequentialSpace();
-    int id;
-    final String ip = "127.0.0.1";
-    final String port = "2934";
-    final String name = "Tom";
-    // Redundant end
 
     public MasterPeer(){
         super("");
@@ -61,6 +54,7 @@ public class MasterPeer extends Peer {
                     @SuppressWarnings("unchecked")
                     HashMap<String, Boolean> isReadyMap = (HashMap<String, Boolean>) readyFlags.get(new ActualField("isReadyList"), new FormalField(HashMap.class))[1];
                     isReadyMap.put((String) readyInfo[1], (Boolean) readyInfo[2]);
+
                     if(isAllReady(isReadyMap)){
                         //TODO: Start Game
                         break;
@@ -96,6 +90,18 @@ public class MasterPeer extends Peer {
         }
     }
 
+    @Override
+    private void initSpaces() {
+        try {
+            chat = new SequentialSpace();
+            chatResp = new SpaceRepository();
+            chatResp.add("chat", chat);
+            chatResp.addGate(formatURI(ip, port) + "/chatResp?keep");
+            peers = new SequentialSpace();
+            
+            chats = new SpaceRepository();
+        } catch(Exception e) {}
+    }
 
 
     /*

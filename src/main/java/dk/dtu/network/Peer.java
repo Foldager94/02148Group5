@@ -19,9 +19,10 @@ import io.github.cdimascio.dotenv.DotenvException;
 public class Peer {
     String name;
     SequentialSpace chat; // Own chat
-    SpaceRepository chatResp;
-    SequentialSpace peers; // (name, id, uri)
-    SpaceRepository chats;  // Peers chat
+    SpaceRepository chatResp; // repository for the peers own chat
+
+    SequentialSpace peers; // (id, name, uri)
+    SpaceRepository chats;  // containts all chats to the other peers
 
     String MPIP = "10.209.157.221";
     String MPPort = "9001";
@@ -30,6 +31,7 @@ public class Peer {
     String port;
     String uri;
     String id;
+    
     RemoteSpace requests;
     RemoteSpace ready;
 
@@ -159,18 +161,5 @@ public class Peer {
         }
         catch (Exception e) {}
 
-    }
-
-    public void main(String[] args) {
-
-        setIpAndPort();
-
-        System.out.println(ip);
-        System.out.println(port);
-
-    }
-
-
-
-    
+    }    
 }

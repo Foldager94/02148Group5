@@ -1,19 +1,27 @@
 package dk.dtu;
 
-import io.github.cdimascio.dotenv.Dotenv;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
-/**
- * Hello world!
- *
- * 
- */
+
 public class App 
 {
-    public static void main( String[] args )
+    public static void main( String[] args ) throws IOException
     {
-        System.out.println( "Hello World!" );
-        Dotenv dotenv = null;
-        dotenv = Dotenv.configure().load();
-        System.out.println(dotenv.get("MPIP"));
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("Do you want to host (h) or join (j) a pokergame");
+        System.out.println("Press h or j");
+        String c = input.readLine();
+        switch (c) {
+            case "h":
+                System.out.println("hosting");
+                break;
+            case "j":
+                System.out.println("joining");
+                break;
+            default:
+                break;
+        }
     }
 }
