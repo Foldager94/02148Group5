@@ -38,7 +38,6 @@ public class ServerMain {
             repository.addGate(gateUri);
             fetchPlayers(players);
             
-
             // Keep reading chat messages and printing them
             //while (true) {
             //    Object[] t = chat.get(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
