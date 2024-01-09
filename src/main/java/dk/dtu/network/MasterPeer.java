@@ -19,6 +19,7 @@ public class MasterPeer extends Peer {
     // Redundant end
 
     public MasterPeer(){
+        super("");
 
     }
 
