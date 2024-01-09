@@ -1,5 +1,6 @@
 package dk.dtu;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import org.jspace.FormalField;
@@ -9,12 +10,14 @@ import org.jspace.Space;
 import dk.dtu.ui.CreateLobbyScreen;
 import dk.dtu.ui.JoinLobbyScreen;
 import dk.dtu.ui.StartScreen;
+import dk.dtu.ui.components.LargeButton;
 import dk.dtu.ui.util.ScreenController;
 import dk.dtu.ui.util.ScreenSize;
 import javafx.application.Application;
 import javafx.event.*;
 import javafx.scene.control.Button;
 import javafx.scene.input.*;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -27,38 +30,31 @@ public class App extends Application {
         launch(args);
     }
 	private Stage primaryStage;
-    private ScreenSize screenSize;
+    private ScreenSize screenSize = new ScreenSize(800, 600);
 
-    private Button createButton = new Button();
-    private Button joinButton = new Button();
+    private Button joinButton;
+    private Scene scene;
 
-    private Scene mainScene;
-    private ScreenController screenController;
-    private Scene startScene;
+    private static Pane root = new Pane();
 
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        initGraphics();
-    }
-
-    private void initGraphics() {
-        screenSize = new ScreenSize(800, 600);
-        StartScreen startScreen = new StartScreen(screenSize);
-
-        screenController = new ScreenController(screenSize, startScreen);
-
-        primaryStage.setResizable(false);
-        primaryStage.setTitle("Poker Game");
+        // createButton.setOnAction(this::handleClick);
+        joinButton = new LargeButton("Join lobby").getButton();
+        joinButton.setLayoutY(20);
+        screenSize.getHeight();
         
-        showStartScreen();
+        root.getChildren().add(joinButton);
+        root.getStyleClass().add("pane");
 
-    }
+        scene = new Scene(root, screenSize.getWidth(), screenSize.getHeight());
 
-    private void showStartScreen() {
-        startScene = new Scene(screenController.getStartSceeen().getGroup(), screenSize.getWidth(),
-        screenSize.getHeight());
-        primaryStage.setScene(startScene);
+        File css = new File("src\\resources\\main.css");
+        scene.getStylesheets().add("file:///" + css.getAbsolutePath().replace("\\", "/"));
+
+        primaryStage.setScene(scene);
         primaryStage.show();
+        joinButton.setLayoutX(screenSize.getWidth() / 2 - joinButton.getLayoutBounds().getWidth() / 2);
     }
 }

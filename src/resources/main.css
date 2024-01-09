@@ -1,0 +1,15 @@
+.button{
+    -fx-text-fill: white;
+    -fx-border-color:white;
+    -fx-border-radius: 5;
+    -fx-padding: 3 6 6 6;
+    -fx-background-color: #262522; /* Replace with your desired color code */
+}
+
+.button:hover {
+    -fx-background-color: #3b3936; /* Replace with your desired color code */
+}
+
+.pane {
+    -fx-background-color: #302e2b; /* Replace with your desired color code */
+}

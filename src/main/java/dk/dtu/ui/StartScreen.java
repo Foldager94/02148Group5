@@ -28,12 +28,6 @@ public class StartScreen {
         // createButton.setOnAction(this::handleClick);
         createButton.setLayoutX(screenSize.getWidth() / 2 - createButton.getLayoutBounds().getWidth() / 2);
         createButton.setLayoutY(20);
-        
-        joinButton.setText("Join lobby abaabab");
-        // joinButton.setOnAction(this::handleClick);
-        joinButton.setLayoutX(screenSize.getWidth() / 2 - joinButton.getLayoutBounds().getWidth() / 2);
-        joinButton.setLayoutY(60);
-        System.out.println(joinButton.getLayoutBounds().getWidth() / 2);
         System.out.println(createButton.getLayoutBounds().getWidth() / 2);
 
         root.getChildren().add(createButton);
