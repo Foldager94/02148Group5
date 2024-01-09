@@ -1,15 +1,62 @@
-.button{
+Button {
     -fx-text-fill: white;
     -fx-border-color:white;
     -fx-border-radius: 5;
     -fx-padding: 3 6 6 6;
-    -fx-background-color: #262522; /* Replace with your desired color code */
+    -fx-background-color: #262522;
+    -fx-font-size: 24;
+    -fx-min-width: 200;
+}
+
+TextField {
+    -fx-background-color: #262522; 
+    -fx-min-width: 80;
+    -fx-border-color:#0d5e2a;
+    -fx-border-radius: 5;
+    -fx-font-size: 20;
+    -fx-text-fill: white; 
+}
+
+.error {
+    -fx-text-fill: red; 
+    -fx-pref-width: 300;
+    -fx-font-size: 16;
+    -fx-alignment: center;
+    fx-font-family: monospace;
 }
 
 .button:hover {
-    -fx-background-color: #3b3936; /* Replace with your desired color code */
+    -fx-background-color: #3b3936;
 }
 
 .pane {
-    -fx-background-color: #302e2b; /* Replace with your desired color code */
+    -fx-background-color: #302e2b; 
+}
+
+.header {
+    -fx-text-fill: #17ac4d; 
+    -fx-font-size: 40;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+}
+
+.header2 {
+    -fx-text-fill: red; 
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+}
+
+
+.list-cell:filled:selected:focused, .list-cell:filled:selected {
+    -fx-background-color: linear-gradient(#328BDB 0%, #207BCF 25%, #1973C9 75%, #0A65BF 100%);
+    -fx-text-fill: white;
+}
+
+.list-cell:even { /* <=== changed to even */
+    -fx-background-color: white;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #0093ff;
+    -fx-text-fill: white;
 }
