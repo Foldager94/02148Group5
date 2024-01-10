@@ -8,17 +8,15 @@ import org.jspace.RemoteSpace;
 import org.jspace.SequentialSpace;
 import org.jspace.Space;
 import org.jspace.SpaceRepository;
-
+import org.jspace.Tuple;
 import dk.dtu.network.Peer;
-
 import java.io.IOException;
-
 public class ChatClient {
+    
     public SequentialSpace chat;
     public SpaceRepository chats;
     public Peer peer;
 
-    
     public ChatClient(Peer peer) {
         chat = new SequentialSpace();
         chats = new SpaceRepository();
@@ -38,11 +36,10 @@ public class ChatClient {
                     String senderName = peer.getPeerName(senderId);
                     String message = (String) messageTuple[1];
                     String privateOrPublic = (Boolean) messageTuple[2] ? "Global" : "Private";
-                    System.out.println(privateOrPublic + " "+ senderName + "#"+ senderId + ": " + message);
+                    System.out.println("("+privateOrPublic + ") "+ senderName + "#"+ senderId + ": " + message);
                 } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
                     Thread.currentThread().interrupt();
-
                     return;
                 }
             }

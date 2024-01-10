@@ -21,6 +21,9 @@ public class MasterPeer extends Peer {
     public int idTracker = 0;
 
 
+    // Get a join request
+    // Retrieve all the piers that are connected
+    // MP includes the peer in the lobby
     public void awaitLobbyRequest(){
         new Thread(() -> {
             while (true) {
@@ -35,8 +38,14 @@ public class MasterPeer extends Peer {
 
                     // Retrieve current peers connected
                     LinkedList<Object[]> peers = this.peers.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
-
+                    // if(peers.size()<7)
                     MPrequests.put("Helo", this.id, peerId, peers, info[2]);
+                    // else {
+                    //     System.out.println("Lobby is full");
+                    // }
+
+                
+
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }

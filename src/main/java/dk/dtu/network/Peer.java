@@ -5,6 +5,7 @@ import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
 import org.jspace.SequentialSpace;
 import org.jspace.SpaceRepository;
+import org.jspace.Tuple;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class Peer {
     public SequentialSpace peers; // (id, name, uri)
     //public SpaceRepository chats;  // contains all chats to the other peers
 
-    public String MPIP = "192.168.0.30";
+    public String MPIP = "172.30.241.115";
     public String MPPort = "9004";
     public int MPID;
     public String ip;
@@ -49,7 +50,8 @@ public class Peer {
             // Dotenv dotenv = null;
             // dotenv = Dotenv.configure().load();
             // System.out.println(dotenv.get("MPIP"));
-            ip = Inet4Address.getLocalHost().getHostAddress().toString();
+            ip = MPIP;
+            // ip = Inet4Address.getLocalHost().getHostAddress().toString();
             // port = "9002";
         } catch (Exception e) {}
     }
@@ -111,9 +113,10 @@ public class Peer {
             for (Object[] obj : objs) {
                 String peerId = (String)obj[0];
                 
-                if (peerId == this.id) { continue; } // ignore itself
+                if (peerId == this.id) continue; // ignore itself
                 
-                chat.getPeerChat(peerId).put("intro", this.id, name, formatURI(ip, port));
+                chat.getPeerChat(peerId).put("introduction", this.id, name, formatURI(ip, port));
+                chat.getChat().get(new ActualField("response"));
             }
         }
         catch(Exception e) {System.out.println(e.getMessage());}
@@ -124,19 +127,19 @@ public class Peer {
         new Thread(() -> {
             try {
                 while (true) {
-                    Object[] obj = chat.getChat().get(
-                        new ActualField("intro"), 
+                    Tuple data = new Tuple(chat.getChat().get(
+                        new ActualField("introduction"), 
                         new FormalField(String.class), // id
                         new FormalField(String.class), // name
                         new FormalField(String.class) // uri
-                    );
-                    System.out.println("recieved introduction");
-                    String peerId = (String)obj[1];
-                    String peerUri = (String)obj[3];
-                    System.out.println(obj[1] + " " + obj[2] + " " + obj[3]);
-                    peers.put(obj[1], obj[2], obj[3]);
-                    chat.addChatToRepo(peerId,peerUri);
-                    //chats.add(peerId, new RemoteSpace(peerUri + "/chat?keep"));
+                    ));
+                    System.out.println("Recieved introduction");
+                    String peerId = data.getElementAt(String.class, 1);
+                    String peerName = data.getElementAt(String.class, 2);
+                    String peerUri = data.getElementAt(String.class, 3);
+                    peers.put(peerId, peerName, peerUri);
+                    chat.addChatToRepo(peerId, peerUri);
+                    chat.getPeerChat(peerId).put("response");
                 }
             } catch (Exception e) {System.out.println(e.getMessage());}
         }).start();
@@ -153,26 +156,24 @@ public class Peer {
         catch (Exception e) {System.out.println(e.getMessage());}
     }
 
-    public List<String> getPeerIds(){
+    public List<String> getPeerIds() {
         List<Object[]> objs = peers.queryAll(
             new FormalField(String.class), // id
             new FormalField(String.class), // name
             new FormalField(String.class) // uri
         );
-
         List<String> ids = new ArrayList<>();
-
         for(Object[] obj : objs){
             ids.add((String)obj[0]);
         }
         return ids;
     }
 
-    public void initChatClient(){
+    public void initChatClient() {
         chat = new ChatClient(this);
     }
 
-    public void startMessageReciever(){
+    public void startMessageReciever() {
         chat.startMessageReciever();
     }
 
@@ -181,7 +182,7 @@ public class Peer {
         return (String)peerTuple[1];
     }
 
-    public void commandHandler() throws IOException{
+    public void commandHandler() throws IOException {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         String command = input.readLine();
         String[] commandTag = command.split(" ");
