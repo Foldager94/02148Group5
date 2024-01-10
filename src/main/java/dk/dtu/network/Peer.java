@@ -1,10 +1,6 @@
 package dk.dtu.network;
 import dk.dtu.chat.ChatClient;
-import org.jspace.ActualField;
-import org.jspace.FormalField;
-import org.jspace.RemoteSpace;
-import org.jspace.SequentialSpace;
-import org.jspace.SpaceRepository;
+import org.jspace.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +17,7 @@ public class Peer {
     public String name;
     //public SequentialSpace chat; // Own chat
     public SpaceRepository remoteResp; // the peers remote repository(s)
-    public SequentialSpace peers; // (id, name, uri)
+    public SequentialSpace peers; // (id, name, uri, isMuted)
     //public SpaceRepository chats;  // contains all chats to the other peers
 
     public String MPIP = "192.168.0.30";
@@ -70,7 +66,7 @@ public class Peer {
             //("Helo", this.id, peerId, peers, info[2]);
             id = (String)obj[2];
             
-            peers.put(id, this.name, obj[4]);
+            peers.put(id, this.name, obj[4], false);
 
             //String[][] peerArray = (String[][])obj[3];
             LinkedList<ArrayList> peerList = (LinkedList<ArrayList>)obj[3];
@@ -80,7 +76,8 @@ public class Peer {
                 String peerId   = (String)peer.get(0);
                 String peerName = (String)peer.get(1);
                 String peerUri  = (String)peer.get(2);
-                peers.put(peerId, peerName, peerUri);
+                Boolean isMuted = false;
+                peers.put(peerId, peerName, peerUri, isMuted);
                 System.out.println("Trying to connect to: " + peerUri);
                 chat.addChatToRepo(peerId,peerUri);
                 //chats.add(peerId, new RemoteSpace(peerUri + "/chat?keep")); 
@@ -106,17 +103,22 @@ public class Peer {
             List<Object[]> objs = peers.queryAll(
                 new FormalField(String.class), // id
                 new FormalField(String.class), // name
-                new FormalField(String.class) // uri
+                new FormalField(String.class), // uri
+                new FormalField(Boolean.class)
             );
             for (Object[] obj : objs) {
                 String peerId = (String)obj[0];
                 
-                if (peerId == this.id) { continue; } // ignore itself
+                if (peerId.equals(this.id)) { continue; } // ignore itself
                 
                 chat.getPeerChat(peerId).put("intro", this.id, name, formatURI(ip, port));
             }
         }
         catch(Exception e) {System.out.println(e.getMessage());}
+    }
+
+    public void sendIntroductionMsg(String peerId) throws InterruptedException {
+        chat.getPeerChat(peerId).put("intro", this.id, name, formatURI(ip, port));
     }
 
     // look in the peers chat for new introductions
@@ -133,8 +135,9 @@ public class Peer {
                     System.out.println("recieved introduction");
                     String peerId = (String)obj[1];
                     String peerUri = (String)obj[3];
+                    Boolean isMuted = false;
                     System.out.println(obj[1] + " " + obj[2] + " " + obj[3]);
-                    peers.put(obj[1], obj[2], obj[3]);
+                    peers.put(obj[1], obj[2], obj[3], isMuted);
                     chat.addChatToRepo(peerId,peerUri);
                     //chats.add(peerId, new RemoteSpace(peerUri + "/chat?keep"));
                 }
@@ -157,7 +160,8 @@ public class Peer {
         List<Object[]> objs = peers.queryAll(
             new FormalField(String.class), // id
             new FormalField(String.class), // name
-            new FormalField(String.class) // uri
+            new FormalField(String.class), // uri
+            new FormalField(Boolean.class)
         );
 
         List<String> ids = new ArrayList<>();
@@ -177,8 +181,29 @@ public class Peer {
     }
 
     public String getPeerName(String peerId) throws InterruptedException {
-        Object[] peerTuple = peers.query(new ActualField(peerId), new FormalField(String.class), new FormalField(String.class));
+        Object[] peerTuple = peers.query(new ActualField(peerId), new FormalField(String.class), new FormalField(String.class), new FormalField(Boolean.class));
         return (String)peerTuple[1];
+    }
+
+    public void updateMuteList(String peerId){
+        try {
+            if(peers.query(new ActualField(peerId), new FormalField(String.class), new FormalField(String.class), new FormalField(Boolean.class)) != null) {
+                Tuple peer = new Tuple(peers.get(new ActualField(peerId), new FormalField(String.class), new FormalField(String.class), new FormalField(Boolean.class)));
+                peers.put(peer.getElementAt(String.class, 0), peer.getElementAt(String.class, 1), peer.getElementAt(String.class, 2), !peer.getElementAt(Boolean.class, 3));
+            } else {
+                System.out.println("Peer with id: " + peerId + " does not exist in your space");
+            }
+        } catch (InterruptedException e) {
+            System.err.println("Could not mute peer with peerId: " + peerId);
+        }
+    }
+
+    public boolean isPeerMuted(String peerId) throws InterruptedException {
+        return (boolean) peers.query(new ActualField(peerId), new FormalField(String.class), new FormalField(String.class), new FormalField(Boolean.class))[3];
+    }
+
+    public boolean isPeerKnown(String peerId) throws InterruptedException {
+        return peers.query(new ActualField(peerId), new FormalField(String.class), new FormalField(String.class), new FormalField(Boolean.class)) != null;
     }
 
     public void commandHandler() throws IOException{
@@ -186,16 +211,16 @@ public class Peer {
         String command = input.readLine();
         String[] commandTag = command.split(" ");
         switch (commandTag[0]) {
-            case "/p":
+            case "/p", "/c":
                 chat.chatHandler(command);
                 break;
-            case "/c":
-            chat.chatHandler(command);
+            case "/m":
+                updateMuteList(commandTag[1]);
                 break;
             case "/g":
                 //Game handler
             default:
-                System.err.println("Unknow command.");
+                System.err.println("Unknown command.");
                 System.err.println("/p for private message");
                 System.err.println("/c for global chat message");
                 System.err.println("/g for game commands");
