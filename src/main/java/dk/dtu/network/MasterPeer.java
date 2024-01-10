@@ -37,7 +37,7 @@ public class MasterPeer extends Peer {
                     //peers.put(peerId,info[1],info[2]);
 
                     // Retrieve current peers connected
-                    LinkedList<Object[]> peers = this.peers.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
+                    LinkedList<Object[]> peers = this.peers.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class), new FormalField(Boolean.class));
                     // if(peers.size()<7)
                     MPrequests.put("Helo", this.id, peerId, peers, info[2]);
                     // else {
@@ -101,7 +101,7 @@ public class MasterPeer extends Peer {
     // Adds master peer to its own peers space inside Peer class
     public void addMasterToOwnPeers() {
         try {
-            this.peers.put(this.id, name, formatURI(ip, port));
+            this.peers.put(this.id, name, formatURI(ip, port), false);
         } catch (InterruptedException e) {
             System.err.println("Can't add MP to peer space.");
         }

@@ -27,16 +27,28 @@ public class ChatClient {
         new Thread(() -> {
             while (true) {
                 try {
-                    Object[] messageTuple = chat.get(
+                    Tuple messageTuple = new Tuple(chat.get(
                         new FormalField(String.class), // sender id
                         new FormalField(String.class), // message
                         new FormalField(Boolean.class) // isAllChat
-                    );
-                    String senderId = (String) messageTuple[0]; // its id
+                    ));
+                    String senderId = messageTuple.getElementAt(String.class, 0); // its id
+
+//                    if(!peer.isPeerKnown(senderId)){
+//                        sendMessage("IntroduceYourSelf", senderId, false);
+//                        continue;
+//                    }
+
+                    System.out.println("message recived");
+                    if(peer.isPeerMuted(senderId)){
+                        sendPeerIsMutedMsg(senderId);
+                        continue;
+                    }
+
                     String senderName = peer.getPeerName(senderId);
-                    String message = (String) messageTuple[1];
-                    String privateOrPublic = (Boolean) messageTuple[2] ? "Global" : "Private";
-                    System.out.println("("+privateOrPublic + ") "+ senderName + "#"+ senderId + ": " + message);
+                    String message = messageTuple.getElementAt(String.class, 1);
+                    String privateOrPublic = messageTuple.getElementAt(Boolean.class, 2) ? "Global" : "Private";
+                    System.out.println(privateOrPublic + " "+ senderName + "#"+ senderId + ": " + message);
                 } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
                     Thread.currentThread().interrupt();
@@ -45,9 +57,46 @@ public class ChatClient {
             }
         }).start();
     }
+
+    public void sendPeerIsMutedMsg(String peerId){
+        try {
+            String message = "has muted you";
+            chats.get(peerId).put(peer.id, message, false);
+        } catch (InterruptedException e) {
+            System.err.println("Could not send IsMutedMsg");
+            throw new RuntimeException(e);
+        }
+    }
+
+//    public void startMessageReciever() {
+//        new Thread(() -> {
+//            while (true) {
+//                try {
+//                    Object[] messageTuple = chat.get(
+//                            new FormalField(String.class), // sender id
+//                            new FormalField(String.class), // message
+//                            new FormalField(Boolean.class) // isAllChat
+//                    );
+//                    String senderId = (String) messageTuple[0]; // its id
+//                    String senderName = peer.getPeerName(senderId);
+//                    String message = (String) messageTuple[1];
+//                    String privateOrPublic = (Boolean) messageTuple[2] ? "Global" : "Private";
+//                    System.out.println(privateOrPublic + " "+ senderName + "#"+ senderId + ": " + message);
+//                } catch (InterruptedException e) {
+//                    System.out.println(e.getMessage());
+//                    Thread.currentThread().interrupt();
+//
+//                    return;
+//                }
+//            }
+//        }).start();
+//    }
     
     public void sendMessage(String message, String recieverID, Boolean isAllChat) {
         try {
+            if(peer.isPeerMuted(recieverID)){
+                return;
+            }
             chats.get(recieverID).put(peer.id, message, isAllChat);
         }
         catch(Exception e) {System.out.println(e.getMessage());}
@@ -58,7 +107,6 @@ public class ChatClient {
             if(recieverID.equals(peer.id)){
                 continue;
             }
-            System.out.println(recieverID);
             sendMessage(message, recieverID, true);
         }
     }
