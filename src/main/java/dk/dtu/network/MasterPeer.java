@@ -14,6 +14,8 @@ public class MasterPeer extends Peer {
         // initSpaces();
 	}
 
+    public final int MAX_LOBBY_SIZE = 8;
+
 
 	SequentialSpace MPrequests;
     SequentialSpace MPreadyFlags;
@@ -38,20 +40,28 @@ public class MasterPeer extends Peer {
 
                     // Retrieve current peers connected
                     LinkedList<Object[]> peers = this.peers.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class), new FormalField(Boolean.class));
-                    // if(peers.size()<7)
+                    if (isLobbyFull()) {
+                        MPrequests.put("Lobby is full", info[2]);
+                        System.out.println("Lobby is full");
+                        continue;
+                    }
+                    MPrequests.put("Approved", info[2]);
+
                     MPrequests.put("Helo", this.id, peerId, peers, info[2]);
-                    // else {
-                    //     System.out.println("Lobby is full");
-                    // }
-
                 
-
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-
             }
         }).start();
+    }
+    
+    public int LobbySize() {
+        return peers.size();
+    }
+    
+    public boolean isLobbyFull() {        
+        return LobbySize() >= MAX_LOBBY_SIZE;
     }
 
     public void awaitReadyFlags(){

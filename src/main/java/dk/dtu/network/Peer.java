@@ -25,7 +25,7 @@ public class Peer {
     public SequentialSpace peers; // (id, name, uri, isMuted)
     //public SpaceRepository chats;  // contains all chats to the other peers
 
-    public String MPIP = "localhost";
+    public String MPIP = "172.30.241.115";
     public String MPPort = "9004";
     public int MPID;
     public String ip;
@@ -50,8 +50,9 @@ public class Peer {
             // Dotenv dotenv = null;
             // dotenv = Dotenv.configure().load();
             // System.out.println(dotenv.get("MPIP"));
-            //ip = MPIP;
-            ip = Inet4Address.getLocalHost().getHostAddress().toString();
+            ip = MPIP;
+            uri = formatURI(ip, port);
+            // ip = Inet4Address.getLocalHost().getHostAddress().toString();
             // port = "9002";
         } catch (Exception e) {}
     }
@@ -59,25 +60,44 @@ public class Peer {
     public void connectToMP() {
         try {
             requests = new RemoteSpace(formatURI(MPIP, MPPort) + "/requests?keep");
-            ready = new RemoteSpace(formatURI(MPIP, MPPort) + "/ready?keep");
             requests.put("Helo", name, formatURI(ip, port));
-            
-            Object[] obj = requests.get(
+
+            Tuple mpResponse = new Tuple(requests.get(
+                new FormalField(String.class), // return message
+                new ActualField(formatURI(ip, port)) // it own uri (which is used as an identifier)
+            ));
+            String mpResponseMsg = mpResponse.getElementAt(String.class, 0);
+
+            if(mpResponseMsg.equals("Lobby is full")){
+                System.out.println("The lobby is full. Connections to Master Peer will be closed");
+                requests.close();
+                System.exit(1);
+                
+            }
+            ready = new RemoteSpace(formatURI(MPIP, MPPort) + "/ready?keep");
+
+            Tuple data = new Tuple(requests.get(
                 new ActualField("Helo"), 
                 new FormalField(String.class), // Mp id
                 new FormalField(String.class), // peer id
                 new FormalField(LinkedList.class), // peers (name, id, uri)[]
-                new FormalField(String.class)
-            );
-            //("Helo", this.id, peerId, peers, info[2]);
-            id = (String)obj[2];
+                new ActualField(uri) // own uri
+            ));
             
-            peers.put(id, this.name, obj[4], false);
+            id = data.getElementAt(String.class, 2);
+            
+            peers.put(id, name, uri, false); // insert itself in its peer space
 
-            //String[][] peerArray = (String[][])obj[3];
-            LinkedList<ArrayList> peerList = (LinkedList<ArrayList>)obj[3];
-            // {Id, Name, Ip:port}
-            for (ArrayList peer : peerList) {
+            LinkedList<ArrayList<Object>> peerList = (LinkedList<ArrayList<Object>>) data.getElementAt(3);
+
+            connectToPeers(peerList);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void connectToPeers(List<ArrayList<Object>> peerList) throws InterruptedException{
+            for (ArrayList<Object> peer : peerList) {
                 System.out.println(peer.toString());
                 String peerId   = (String)peer.get(0);
                 String peerName = (String)peer.get(1);
@@ -86,10 +106,6 @@ public class Peer {
                 peers.put(peerId, peerName, peerUri, isMuted);
                 System.out.println("Trying to connect to: " + peerUri);
                 chat.addChatToRepo(peerId,peerUri);
-                //chats.add(peerId, new RemoteSpace(peerUri + "/chat?keep")); 
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -232,3 +248,4 @@ public class Peer {
         }
     }
 }
+    

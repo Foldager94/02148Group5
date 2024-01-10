@@ -1,5 +1,6 @@
 package dk.dtu.chat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,19 +35,25 @@ public class ChatClient {
                     ));
                     String senderId = messageTuple.getElementAt(String.class, 0); // its id
 
-//                    if(!peer.isPeerKnown(senderId)){
-//                        sendMessage("IntroduceYourSelf", senderId, false);
-//                        continue;
-//                    }
+                   if(!peer.isPeerKnown(senderId)){
+                       sendMessage("IntroduceYourSelf", senderId, false);
+                       continue;
+                   }
 
-                    System.out.println("message recived");
                     if(peer.isPeerMuted(senderId)){
                         sendPeerIsMutedMsg(senderId);
                         continue;
                     }
+                    
+                    String message = messageTuple.getElementAt(String.class, 1);
+
+                    if(message.equals("IntroduceYourSelf")){
+                        peer.sendIntroductionMsg(senderId);
+                        continue;
+                    }
+
 
                     String senderName = peer.getPeerName(senderId);
-                    String message = messageTuple.getElementAt(String.class, 1);
                     String privateOrPublic = messageTuple.getElementAt(Boolean.class, 2) ? "Global" : "Private";
                     System.out.println(privateOrPublic + " "+ senderName + "#"+ senderId + ": " + message);
                 } catch (InterruptedException e) {
@@ -57,10 +64,10 @@ public class ChatClient {
             }
         }).start();
     }
-
+    
     public void sendPeerIsMutedMsg(String peerId){
         try {
-            String message = "has muted you";
+            String message = peer.name + "has muted you";
             chats.get(peerId).put(peer.id, message, false);
         } catch (InterruptedException e) {
             System.err.println("Could not send IsMutedMsg");
