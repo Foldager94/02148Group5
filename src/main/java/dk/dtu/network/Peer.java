@@ -50,8 +50,8 @@ public class Peer {
             // Dotenv dotenv = null;
             // dotenv = Dotenv.configure().load();
             // System.out.println(dotenv.get("MPIP"));
-            ip = MPIP;
-            // ip = Inet4Address.getLocalHost().getHostAddress().toString();
+            //ip = MPIP;
+            ip = Inet4Address.getLocalHost().getHostAddress().toString();
             // port = "9002";
         } catch (Exception e) {}
     }
