@@ -226,6 +226,10 @@ public class Peer {
         return peers.query(new ActualField(peerId), new FormalField(String.class), new FormalField(String.class), new FormalField(Boolean.class)) != null;
     }
 
+    public List<Object[]> getListOfPeers(){
+        return this.peers.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class), new FormalField(Boolean.class));
+    }
+
     public void commandHandler() throws IOException {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         String command = input.readLine();

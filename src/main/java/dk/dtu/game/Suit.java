@@ -1,4 +1,4 @@
-package dk.dtu.PokerGame;
+package dk.dtu.game;
 
 public enum Suit {
     Hearts,

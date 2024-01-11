@@ -1,7 +1,6 @@
 package dk.dtu.PokerGame;
 
 public class Table {
-    int round;
     Player[] players;
     Board board;
 

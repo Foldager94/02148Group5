@@ -4,9 +4,9 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
-import dk.dtu.PokerGame.Card;
+import dk.dtu.game.Card;
 import dk.dtu.PokerGame.Rules;
-import dk.dtu.PokerGame.Suit;
+import dk.dtu.game.Suit;
 import java.util.Collections;
 
 public class RulesTest {
@@ -162,7 +162,8 @@ public class RulesTest {
         cardList.add(new Card(5, Suit.Diamonds));
         cardList.add(new Card(14, Suit.Hearts));
         cardList.add(new Card(4, Suit.Spades));
-        cardList.add(new Card(6, Suit.Clubs));
+        cardList.add(new Card(7, Suit.Clubs));
+        // 2 3 4 5 6
         Collections.sort(cardList);
         assertEquals(rule.isStraight(cardList), true);
     }

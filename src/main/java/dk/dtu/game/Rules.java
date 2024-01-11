@@ -1,12 +1,10 @@
-package dk.dtu.PokerGame;
+package dk.dtu.game;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-
 
 public class Rules {
     public int determineHand(List<Card> holeCards, List<Card> communityCards){

@@ -1,24 +1,24 @@
-package dk.dtu.PokerGame;
-import java.util.Collections;
+package dk.dtu.game;
+
 import java.util.List;
 import java.util.ArrayList;
 
 public class Player {
-    String name;
+    String id;
     int balance;
     boolean inGame;
     boolean inRound;
     List<Card> holeCards = new ArrayList<Card>(2);
-    public Player(String name, int balance, List<Card> holeCards) {
-        this.name = name;
+
+    public Player(String id, int balance) {
+        this.id = id;
         this.balance = balance;
-        this.holeCards = holeCards;
         this.inGame = true;
-        this.inRound=true;
+        this.inRound = true;
     }
 
     public String getName() {
-        return this.name;
+        return this.id;
     }
 
     public void addToBalance(int amount) {
@@ -43,14 +43,4 @@ public class Player {
     public void fold()  {
         this.inRound=false;
     }
-
-    // public boolean bet(int balance) {
-
-    // }
-
-
-
-
-
 }
-
