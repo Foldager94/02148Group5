@@ -48,13 +48,16 @@ public class StartScreen extends Application {
         Button createButton = new Button("Create lobby");
         joinButton.setLayoutY(screenSize.getHeight() / 2 + 50);
         createButton.setLayoutY(screenSize.getHeight() / 2 + 50);
+        joinButton.getStyleClass().add("main-button");
+        createButton.getStyleClass().add("main-button");
+
 		joinButton.setOnAction(event -> {
 		    joinLobby();
 		});
+
         createButton.setOnAction(event -> {
 		    createLobby();
 		});
-
 
         username = new TextField();
         username.setLayoutY(screenSize.getHeight() / 2 - 80);

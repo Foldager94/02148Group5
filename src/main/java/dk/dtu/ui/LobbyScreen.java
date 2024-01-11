@@ -4,6 +4,8 @@ import java.awt.Point;
 import java.awt.TextField;
 import java.io.File;
 
+import dk.dtu.ui.components.HBoxCell;
+import dk.dtu.ui.components.PlayersListView;
 import dk.dtu.ui.util.ScreenSize;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -37,12 +39,11 @@ public class LobbyScreen {
 
 
 		header.getStyleClass().add("header");
-
 		ObservableList<String> names = FXCollections.observableArrayList("Alice", "Bob", "Chalie");
-		ListView<String> listView = new ListView<String>(names);
+		ListView<HBoxCell> listView = new PlayersListView(names, 8).getView();
+
 		listView.setLayoutX(100);
 		listView.setLayoutY(150);
-		listView.setMaxHeight(240); // 24 px pr row
 
 		root.getChildren().add(listView);
 		root.getChildren().add(header);
