@@ -7,15 +7,22 @@ import java.io.IOException;
 import java.util.List;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
+import dk.dtu.game.commands.ConnectionStatus;
+import dk.dtu.game.commands.GamePhase;
+import dk.dtu.game.commands.RoundStatus;
+import dk.dtu.game.commands.enums.ConnectionStatusType;
+import dk.dtu.game.commands.enums.GamePhaseType;
+import dk.dtu.game.commands.enums.RoundStatusType;
+import static dk.dtu.game.GameSettings.*;
 
-import dk.dtu.game.round.RoundState;
 import dk.dtu.network.Peer;
+
 public class GameClient {
     public SequentialSpace gameSpace;
     public SpaceRepository gameSpaces;
     public Peer peer;
     public GameState gameState;
-    public GameCommands gameCommands; 
+    public final GameCommands gameCommands = new GameCommands(this);
 
     public GameClient(Peer peer) {
         gameSpace = new SequentialSpace();
@@ -23,37 +30,46 @@ public class GameClient {
         gameState = new GameState();
         this.peer = peer;
     }
-    
-    public void startGameCommandReciver() {
+    public void startGameCommandReceiver() {
         new Thread(() -> {
-            try {
-                Tuple messageTuple = new Tuple(gameSpace.get(
-                    new FormalField(String.class), // command
-                    new FormalField(String.class)  // json
-                ));
-                gameCommands.commandHandler(messageTuple, gameState.currentRoundState);
-            } catch (InterruptedException e) {
-                System.out.println(e.getMessage());
-                Thread.currentThread().interrupt();
-                return;
+            while(true){
+                try {
+                    Tuple messageTuple = new Tuple(gameSpace.get(
+                        new FormalField(String.class), // command
+                        new FormalField(String.class)  // json
+                    ));
+                    gameCommands.commandHandler(messageTuple, gameState.currentRoundState);
+                } catch (InterruptedException e) {
+                    System.out.println(e.getMessage());
+                    Thread.currentThread().interrupt();
+                    return;
+                }
             }
         }).start();
     }
 
+    public void initGame() {
+        addPlayerToGameState(peer.id);
+        startGameCommandReceiver();
+        connectToPeersGameSpace();
+        ConnectionStatus command = new ConnectionStatus(peer.id, ConnectionStatusType.Ping);
+        sendGlobalCommand(peer.getPeerIds(), "ConnectionStatus", command.toJson());
+    }
 
-    public void sendCommand(String recieverID, String command, String jsonObject) {
+    public void sendCommand(String ReceiverID, String command, String jsonObject) {
         try {
-            getPeerGameSpace(recieverID).put(command, jsonObject);
+            getPeerGameSpace(ReceiverID).put(command, jsonObject);
         }
         catch(Exception e) {System.out.println(e.getMessage());}
     }
 
     public void sendGlobalCommand(List<String> ids, String command, String jsonObject) {
-        for (String recieverID : ids) {
-            if(recieverID.equals(peer.id)){
+        for (String ReceiverID : ids) {
+            if(ReceiverID.equals(peer.id)){
                 continue;
             }
-            sendCommand(recieverID, command, jsonObject);
+            sendCommand(ReceiverID, command, jsonObject);
+
         }
     }
 
@@ -68,7 +84,6 @@ public class GameClient {
             addGameSpaceToRepo(peerId, peerUri);
         }
     }
-
     public void addGameSpaceToRepo(String peerId, String peerUri){
         try {
             gameSpaces.add(peerId, new RemoteSpace(peerUri + "/gameSpace?keep"));
@@ -77,88 +92,41 @@ public class GameClient {
             e.printStackTrace();
         }
     }
+    public boolean connectionEstablishedToAll() {
+        return peer.chat.chats.size() == gameState.players.size();
+    }
+
 
     public Space getPeerGameSpace(String peerId){
         return gameSpaces.get(peerId);
     }
+    
+    // TODO: Change player balance at some point
+    public void addPlayerToGameState(String peerId){
+        Player newPlayer = new Player(peerId, START_BALANCE);
+        gameState.addPlayer(newPlayer);
+    }
 
-    // public void commandHandler(Tuple messageTuple){
-    //     String command = messageTuple.getElementAt(String.class, 0);
-    //     switch (command) {
-    //         // Dealer Commands
-    //         case "PreFlop":
-    //             System.err.println("NotImplementedException: PreFlop");
-    //             break;
-    //         case "Flop":
-    //             System.err.println("NotImplementedException: Flop");
-    //             break;
-    //         case "Turn":
-    //             System.err.println("NotImplementedException: Turn");
-    //             break;
-    //         case "River":
-    //             System.err.println("NotImplementedException: River");
-    //             break;
-    //         case "Showdown":
-    //             System.err.println("NotImplementedException: Showdown");
-    //             break;
-    //         case "BettingRound":
-    //             System.err.println("NotImplementedException: BettingRound");
-    //             break;
-    //         case "SendCards":
-    //             System.err.println("NotImplementedException: SendCards");
-    //             break;
-    //         case "NewRoundStarted":
-    //             System.err.println("NotImplementedException: NewRoundStarted");
-    //             break;
-    //         case "RoundEnded":
-    //             System.err.println("NotImplementedException: RoundEnded");
-    //             break;
-    //         // Player commands
-    //         case "Ping":
-    //             System.err.println("NotImplementedException: Ping");
-    //             break;
-    //         case "Pong":
-    //             System.err.println("NotImplementedException: Pong");
-    //             break;
-    //         case "RequestCards":
-    //             System.err.println("NotImplementedException: RequestCards");
-    //             break;
-    //         case "MessageRecived":
-    //             System.err.println("NotImplementedException: MessageRecived");
-    //             break;
-    //         case "Fold":
-    //             System.err.println("NotImplementedException: Fold");
-    //             break;
-    //         case "Bet":
-    //             System.err.println("NotImplementedException: Bet");
-    //             break;
-    //         case "Raise":
-    //             System.err.println("NotImplementedException: Raise");
-    //             break;
-    //         case "Check":
-    //             System.err.println("NotImplementedException: Check");
-    //             break;
-    //         case "Call":
-    //             System.err.println("NotImplementedException: Call");
-    //             break;
-    //         case "Broke":
-    //             System.err.println("NotImplementedException: Broke");
-    //             break;
-    //         case "RoundStateUpdated":
-    //             System.err.println("NotImplementedException: RoundStateUpdated");
-    //             break;
-    //         case "RoundStateSync":
-    //             System.err.println("NotImplementedException: RoundStateSync");
-    //             break;
-    //         case "RoundStateSyncApproved":
-    //             System.err.println("NotImplementedException: RoundStateSyncApproved");
-    //             break;
-    //         case "RoundStateSyncDisapproved":
-    //             System.err.println("NotImplementedException: RoundStateSyncDisapproved");
-    //             break;
-    //         default:
-    //             System.err.println("GameClient: Command unknown");
-    //             break;
-    //     }
-    // }
+    public void startNewRound(){
+        RoundStatus roundStatus = new RoundStatus(peer.id, RoundStatusType.NewRoundStarted);
+        sendGlobalCommand(peer.getPeerIds(), "RoundStatus", roundStatus.toJson());
+        gameState.createNewRoundState(peer.id);
+        initPreFlop();
+    }
+
+    public void initPreFlop(){
+        gameState.resetDeck();
+        List<String> PeerIds = peer.getPeerIds();
+        List<Card> holeCards;
+        for(String id : PeerIds) { // the dealer deal 2 cards to each player
+            holeCards = gameState.deck.draw(2);
+            GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.PreFlop, holeCards);
+            sendCommand(id, "GamePhase", gpCommand.toJson());
+        }
+        holeCards = gameState.deck.draw(2);
+        gameState.currentRoundState.getOwnPlayerObject().setHoleCards(holeCards);
+        gameState.currentRoundState.calculateBlindsBet();
+        System.out.println(gameState.currentRoundState.toString());
+    }
+
 }

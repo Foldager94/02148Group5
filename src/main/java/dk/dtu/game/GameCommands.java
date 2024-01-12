@@ -5,9 +5,17 @@ import org.jspace.Tuple;
 
 import com.google.gson.Gson;
 
-import dk.dtu.game.round.RoundState;
 import dk.dtu.game.commands.SendHoleCards;
+import dk.dtu.game.commands.Action;
 
+import dk.dtu.game.commands.enums.ConnectionStatusType;
+import dk.dtu.game.commands.ConnectionStatus;
+
+import dk.dtu.game.commands.RoundStatus;
+
+import dk.dtu.game.round.RoundState;
+import dk.dtu.game.commands.GamePhase;
+import dk.dtu.game.commands.SyncState;
 public class GameCommands{
     GameClient gameClient;
 
@@ -15,152 +23,133 @@ public class GameCommands{
         this.gameClient = gameClient;
     }
 
+    int readyCount = 0;
+    public boolean isEveryoneReady(){
+        return readyCount == gameClient.peer.chat.chats.size();
+    }
+
     public void commandHandler(Tuple messageTuple, RoundState roundState) {
         String command = messageTuple.getElementAt(String.class, 0);
         String jsonObject = messageTuple.getElementAt(String.class, 1);
+       
         switch (command) {
-            case "PreFlop": preFlopCommand(jsonObject, roundState); break;
-            case "Flop": flopCommand(); break;
-            case "Turn": turnCommand(); break;
-            case "River": riverCommand(); break;
-            case "Showdown": showdownCommand(); break;
-            case "BettingRound": bettingRoundCommand(); break;
-            case "SendHoleCards": sendHoleCardsCommand(jsonObject, roundState); break;
-            case "NewRoundStarted": newRoundStartedCommand(); break;
-            case "RoundEnded": roundEndedCommand(); break;
-            case "Ping": pingCommand(); break;
-            case "Pong": pongCommand(); break;
-            case "RequestHoleCards": requestCardsCommand(); break;
-            case "MessageRecived": messageReceivedCommand(); break;
-            case "Fold": foldCommand(); break;
-            case "Bet": betCommand(); break;
-            case "Raise": raiseCommand(); break;
-            case "Check": checkCommand(); break;
-            case "Call": callCommand(); break;
-            case "Broke": brokeCommand(); break;
-            case "RoundStateUpdated": roundStateUpdatedCommand(); break;
-            case "RoundStateSync": roundStateSyncCommand(); break;
-            case "RoundStateSyncApproved": roundStateSyncApprovedCommand(); break;
-            case "RoundStateSyncDisapproved": roundStateSyncDisapprovedCommand(); break;
-            default: unknownCommand(); break;
+            case "Action": actionCommand(jsonObject, roundState); break;
+            case "ConnectionStatus": connectionStatusCommand(jsonObject, roundState); break;
+            case "GamePhase": gamePhaseCommand(jsonObject, roundState); break;
+            case "SyncState": syncStateCommand(jsonObject, roundState); break;
+            case "RoundStatus": roundStatusCommand(jsonObject, roundState); break;
+            default: unknownCommand(messageTuple); break;
+            // Mangler command for showdown, newRoundStarted, RoundEnded og Broke
         }
     }
 
 
-    private void preFlopCommand(String jsonObject, RoundState roundState) {
-        // Implementer PreFlop logik her
-        String dealerId = roundState.getDealer();
-
-        // request 2 cards
-        gameClient.sendCommand(dealerId, "RequestHoleCards", "{'senderId':'"+gameClient.peer.id+"'}");
-        // await 2 cards
-
-        // send message that the 2 cards have been received
-        // update roundState holeCards
-        // calculate Blinds
-        // Update roundState
-        // calculate pot from small/big blind fee
-        // Update roundState Pot
-        // calculate small/big blind balance
-        // Update round state players balance
-        // Send message to dealer that roundState is updated and are ready to continue
-    }
-    private void sendHoleCardsCommand(String jsonObject, RoundState roundState) {
-        SendHoleCards data = SendHoleCards.fromJson(jsonObject);
-        roundState.getPlayer().getHoleCards().addAll(data.getHoleCards());
-        // Implementer SendCards logik her
+    public void actionCommand(String jsonObject, RoundState roundState){
+        Action action = Action.fromJson(jsonObject);
     }
 
-
-    private void flopCommand() {
-        // Implementer Flop logik her
+    public void connectionStatusCommand(String jsonObject, RoundState roundState){
+    
+        ConnectionStatus connectionStatus = ConnectionStatus.fromJson(jsonObject);
+        ConnectionStatus connectionStatusResponse;
+        switch(connectionStatus.getConnectionStatus()){
+            case Ping:
+                connectionStatusResponse = new ConnectionStatus(gameClient.peer.id, ConnectionStatusType.Pong);
+                gameClient.sendCommand(connectionStatus.getSenderId(), "ConnectionStatus", connectionStatusResponse.toJson());
+                break;
+            case Pong:
+                gameClient.addPlayerToGameState(connectionStatus.getSenderId());
+                if(gameClient.connectionEstablishedToAll()){
+                    connectionStatusResponse = new ConnectionStatus(gameClient.peer.id, ConnectionStatusType.ConnectionsEstablished);
+                    if(gameClient.peer.id != gameClient.peer.MPID){
+                        gameClient.sendCommand(gameClient.peer.MPID, "ConnectionStatus", connectionStatusResponse.toJson());
+                    }
+                }
+                break;
+            case ConnectionsEstablished:
+                readyCount++;
+                if(isEveryoneReady()){
+                    gameClient.startNewRound();
+                }
+                break;
+            default:
+                System.err.println("connectionStatus type unknown. Received: " + connectionStatus.getConnectionStatus());
+                
+        }
     }
+    public void gamePhaseCommand(String jsonObject, RoundState roundState){
+        GamePhase gamePhase = GamePhase.fromJson(jsonObject);
+        switch(gamePhase.getGamePhase()){
+            case PreFlop:
+                gameClient.gameState.currentRoundState.getOwnPlayerObject().setHoleCards(gamePhase.getCards());
+                gameClient.gameState.currentRoundState.calculateBlindsBet();
+                System.out.println(gameClient.gameState.currentRoundState.toString());
+                break;
+            case Flop:
+                break;
+            case Turn:
+                break;
+            case River:
+                break;
+            default:
+                break;
+                
 
-    private void turnCommand() {
-        // Implementer Turn logik her
-    }
-
-    private void riverCommand() {
-        // Implementer River logik her
-    }
-
-    private void showdownCommand() {
-        // Implementer Showdown logik her
-    }
-
-    private void bettingRoundCommand() {
-        // Implementer BettingRound logik her
-    }
-
-
-    private void newRoundStartedCommand() {
-        // Implementer NewRoundStarted logik her
-    }
-
-    private void roundEndedCommand() {
-        // Implementer RoundEnded logik her
-    }
-
-    private void pingCommand() {
-        // Implementer Ping logik her
-    }
-
-    private void pongCommand() {
-        // Implementer Pong logik her
-    }
-
-    private void requestCardsCommand() {
-        // Implementer RequestCards logik her
-    }
-
-    private void messageReceivedCommand() {
-        // Implementer MessageRecived logik her
-    }
-
-    private void foldCommand() {
-        // Implementer Fold logik her
-    }
-
-    private void betCommand() {
-        // Implementer Bet logik her
-    }
-
-    private void raiseCommand() {
-        // Implementer Raise logik her
-    }
-
-    private void checkCommand() {
-        // Implementer Check logik her
-    }
-
-    private void callCommand() {
-        // Implementer Call logik her
-    }
-
-    private void brokeCommand() {
-        // Implementer Broke logik her
-    }
-
-    private void roundStateUpdatedCommand() {
-        // Implementer RoundStateUpdated logik her
-    }
-
-    private void roundStateSyncCommand() {
-        // Implementer RoundStateSync logik her
-    }
-
-    private void roundStateSyncApprovedCommand() {
-        // Implementer RoundStateSyncApproved logik her
-    }
-
-    private void roundStateSyncDisapprovedCommand() {
-        // Implementer RoundStateSyncDisapproved logik her
-    }
-
-    private void unknownCommand() {
-        System.err.println("GameClient: Command unknown");
+        }
     }
     
+    public void roundStatusCommand(String jsonObject, RoundState roundState){
+        RoundStatus roundStatus = RoundStatus.fromJson(jsonObject);
+        //RoundStatus roundStatusResponse;
+        switch (roundStatus.getRoundStatus()) {
+            case NewRoundStarted:
+                gameClient.gameState.createNewRoundState(gameClient.peer.id);
+                break;
 
+            case RoundEnded: 
+
+                break;
+    
+            default:
+                break;
+        }
+    }
+
+
+    public void syncStateCommand(String jsonObject, RoundState roundState){
+        
+        SyncState syncState = SyncState.fromJson(jsonObject);
+        
+
+    }
+
+	private void unknownCommand(Tuple messageTuple) {
+        System.err.println("GameClient: Command unknown " +
+        messageTuple.getElementAt(String.class, 0)+ ": "+ messageTuple.getElementAt(String.class, 1));
+    }
     
 }
+ // private void preFlopCommand(String jsonObject, RoundState roundState) {
+    //     // Implementer PreFlop logik her
+    //     String dealerId = roundState.getDealer();
+
+    //     // request 2 cards
+    //     gameClient.sendCommand(dealerId, "RequestHoleCards", "{'senderId':'"+gameClient.peer.id+"'}");
+    //     // await 2 cards
+
+    //     // send message that the 2 cards have been received
+    //     // update roundState holeCards
+    //     // calculate Blinds
+    //     // Update roundState
+    //     // calculate pot from small/big blind fee
+    //     // Update roundState Pot
+    //     // calculate small/big blind balance
+    //     // Update round state players balance
+    //     // Send message to dealer that roundState is updated and are ready to continue
+    // }
+    // private void sendHoleCardsCommand(String jsonObject, RoundState roundState) {
+    //     SendHoleCards data = SendHoleCards.fromJson(jsonObject);
+    //     roundState.getPlayer().getHoleCards().addAll(data.getHoleCards());
+    //     // Implementer SendCards logik her
+    // }
+

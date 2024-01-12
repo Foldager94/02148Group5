@@ -18,18 +18,18 @@ public class Deck {
         shuffle();
     }    
 
-    public static void shuffle() {
+    public void shuffle() {
         usedCards = 0;
 		Collections.shuffle(cards);
     }
 
-    public static List<Card> draw(int nCards) {
+    public List<Card> draw(int nCards) {
         List<Card> drawnCards = cards.subList(cards.size()-nCards-usedCards, cards.size()-usedCards);
         usedCards += nCards;
         return drawnCards;
     }
 
-    public static int getRemainingDeckSize() {
+    public int getRemainingDeckSize() {
         return 52 - usedCards;
     }
 

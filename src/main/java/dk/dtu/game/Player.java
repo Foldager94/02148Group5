@@ -17,7 +17,7 @@ public class Player {
         this.inRound = true;
     }
 
-    public String getName() {
+    public String getId() {
         return this.id;
     }
 
@@ -43,4 +43,11 @@ public class Player {
     public void fold()  {
         this.inRound=false;
     }
+
+    @Override
+    public String toString() {
+        return "Player ID: " + id + " | Balance: " + balance + " | In Game: " + inGame + " | In Round: " + inRound
+                + " | Hole Cards: " + (holeCards.isEmpty() ? "Hidden" : holeCards + "...");
+    }
+
 }

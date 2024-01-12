@@ -41,7 +41,7 @@ public class App
         mp.awaitLobbyRequest();
         mp.awaitReadyFlags();
         mp.getIntroduction();
-        mp.startMessageReciever();
+        mp.startMessageReceiver();
         while(true) {
             mp.commandHandler();
         }
@@ -52,7 +52,7 @@ public class App
         p.connectToMP();
         p.sendIntroduction();
         p.getIntroduction();
-        p.startMessageReciever();
+        p.startMessageReceiver();
         while(true) {
             p.commandHandler();
         }

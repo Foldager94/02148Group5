@@ -9,6 +9,7 @@ public class MasterPeer extends Peer {
     public MasterPeer(String name) {
 		super(name, "9004");
         this.id = generateNewPeerId();
+        this.MPID = this.id;
         addMasterToOwnPeers();
 		//TODO Auto-generated constructor stub
         // initSpaces();
@@ -123,7 +124,7 @@ public class MasterPeer extends Peer {
             remoteResp = new SpaceRepository();
             remoteResp.add("chat", chat.getChat());
             peers = new SequentialSpace();
-            
+            remoteResp.add("gameSpace", game.getGameSpace());
             MPrequests = new SequentialSpace();
             MPreadyFlags = new SequentialSpace();
             remoteResp.add("requests", MPrequests);

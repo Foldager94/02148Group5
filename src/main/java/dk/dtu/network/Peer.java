@@ -1,5 +1,7 @@
 package dk.dtu.network;
 import dk.dtu.chat.ChatClient;
+import dk.dtu.game.GameClient;
+
 import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
@@ -19,15 +21,16 @@ import java.util.List;
 public class Peer {
 
     public ChatClient chat;
+    public GameClient game;
     public String name;
     //public SequentialSpace chat; // Own chat
     public SpaceRepository remoteResp; // the peers remote repository(s)
     public SequentialSpace peers; // (id, name, uri, isMuted)
     //public SpaceRepository chats;  // contains all chats to the other peers
-
-    public String MPIP = "172.30.241.115";
+    
+    public String MPIP = "localhost";
     public String MPPort = "9004";
-    public int MPID;
+    public String MPID;
     public String ip;
     public String port;
     public String uri;
@@ -42,6 +45,7 @@ public class Peer {
         this.port = port;
         setIpAndPort();
         initChatClient();
+        initGameClient();
         initSpaces();
     }
 
@@ -83,7 +87,7 @@ public class Peer {
                 new FormalField(LinkedList.class), // peers (name, id, uri)[]
                 new ActualField(uri) // own uri
             ));
-            
+            MPID = data.getElementAt(String.class, 1);
             id = data.getElementAt(String.class, 2);
             
             peers.put(id, name, uri, false); // insert itself in its peer space
@@ -114,6 +118,7 @@ public class Peer {
             //chat = new SequentialSpace();
             remoteResp = new SpaceRepository();
             remoteResp.add("chat", chat.getChat());
+            remoteResp.add("gameSpace", game.getGameSpace());
             remoteResp.addGate(formatURI(ip, port) + "/?keep");
             peers = new SequentialSpace();
         } catch(Exception e) {System.out.println(e.getMessage());}
@@ -155,7 +160,7 @@ public class Peer {
                         new FormalField(String.class), // name
                         new FormalField(String.class) // uri
                     ));
-                    System.out.println("Recieved introduction");
+                    System.out.println("Received introduction");
                     String peerId = data.getElementAt(String.class, 1);
                     String peerName = data.getElementAt(String.class, 2);
                     String peerUri = data.getElementAt(String.class, 3);
@@ -192,12 +197,16 @@ public class Peer {
         return ids;
     }
 
+    public void initGameClient() {
+        game = new GameClient(this);
+    }
+
     public void initChatClient() {
         chat = new ChatClient(this);
     }
 
-    public void startMessageReciever() {
-        chat.startMessageReciever();
+    public void startMessageReceiver() {
+        chat.startMessageReceiver();
     }
 
     public String getPeerName(String peerId) throws InterruptedException {
@@ -235,12 +244,19 @@ public class Peer {
         String command = input.readLine();
         String[] commandTag = command.split(" ");
         switch (commandTag[0]) {
-            case "/p", "/c":
+            case "/p", "/c", "/start":
                 chat.chatHandler(command);
                 break;
             case "/m":
                 updateMuteList(commandTag[1]);
                 break;
+            // case "/start":
+            //     if(id.equals("0")){
+            //         chat.sendGlobalMessage("Game is Starting", getPeerIds());
+            //         break;
+            //     }
+            //     System.out.println("System: You are not allowed to start the game");
+                //break;
             case "/g":
                 //Game handler
             default:
