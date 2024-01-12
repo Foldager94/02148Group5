@@ -1,5 +1,4 @@
-package dk.dtu.server;
-
+package dk.dtu.noter;
 import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.SequentialSpace;
@@ -20,13 +19,13 @@ public class ServerMain {
             String uri = "tcp://localhost:9001/?keep";
             URI myUri = new URI(uri);
             String gateUri = "tcp://" + myUri.getHost() + ":" + myUri.getPort() +  "?keep" ;
-
             // Create a repository
             SpaceRepository repository = new SpaceRepository();
             // Create a local spaces
             SequentialSpace chat = new SequentialSpace();
             SequentialSpace players = new SequentialSpace();
             SequentialSpace game = new SequentialSpace();
+
             // Add the spaces to the repository
             repository.add("chat", chat);
             repository.add("players", players);
@@ -49,20 +48,18 @@ public class ServerMain {
             e.printStackTrace();
         }
     }
-    
     public static void fetchPlayers(SequentialSpace players) {
-        System.out.println("Ready to recieve player name requests...");
+        System.out.println("Ready to receive player name requests...");
         while (true) {
             try {
                 // retrieve new player name
-                System.err.println("Retriveing request name");
+                System.err.println("Retrieving request name");
                 Object[] newPlayer = players.get(new ActualField("insertName"), new FormalField(String.class), new FormalField(String.class));
-                System.out.println("Recieved new name request");
+                System.out.println("Received new name request");
                 String uuid = newPlayer[1].toString();
                 String name = newPlayer[2].toString();
                 // retrieve array of current player names
                 Object[] currentPlayers = players.get(new ActualField("playerNames"), new FormalField(Map.class));
-
                 Map<String, String> playerNames = (Map<String, String>) currentPlayers[1];
                 System.out.println("info: " + uuid + " " + name);
 
