@@ -10,6 +10,7 @@ import org.jspace.Space;
 import dk.dtu.ui.LobbyScreen;
 import dk.dtu.ui.LobbyScreen;
 import dk.dtu.ui.StartScreen;
+import dk.dtu.ui.controllers.StartController;
 import dk.dtu.ui.util.ScreenController;
 import dk.dtu.ui.util.ScreenSize;
 import javafx.application.Application;
@@ -39,10 +40,18 @@ public class StartScreen extends Application {
     private int errors = 0;
     private LobbyScreen lobbyScreen;
     private Scene lobbyScene;
+    private StartController startController;
 
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
+
+
+        errorText = new Label("");
+        errorText.setLayoutY(screenSize.getHeight() / 2 + 100);
+        errorText.getStyleClass().add("error");
+
+        startController = new StartController(screenSize, errorText);
 
 
         Button joinButton = new Button("Join lobby");
@@ -53,11 +62,11 @@ public class StartScreen extends Application {
         createButton.getStyleClass().add("main-button");
 
 		joinButton.setOnAction(event -> {
-		    joinLobby();
+		    startController.joinLobby(username.getText(), primaryStage);;
 		});
 
         createButton.setOnAction(event -> {
-		    createLobby();
+		    startController.createLobby(username.getText(), primaryStage);;
 		});
 
         username = new TextField();
@@ -68,9 +77,7 @@ public class StartScreen extends Application {
         Label header = new Label("Welcome to our Poker Game");
         header.getStyleClass().add("header");
         header.setLayoutY(screenSize.getHeight() / 2 - 140);
-        errorText = new Label("");
-        errorText.setLayoutY(screenSize.getHeight() / 2 + 100);
-        errorText.getStyleClass().add("error");
+
 
         root.getChildren().add(header);
         root.getChildren().add(joinButton);
@@ -80,7 +87,7 @@ public class StartScreen extends Application {
         root.getStyleClass().add("pane");
 
         scene = new Scene(root, screenSize.getWidth(), screenSize.getHeight());
-        addCss("src\\resources\\main.css", scene);
+        startController.addCss("src\\resources\\main.css", scene);
         File icon = new File("src\\resources\\images\\king.png");
 
         primaryStage.getIcons().add(new Image(icon.getAbsolutePath().replace("\\", "/")));
@@ -94,44 +101,6 @@ public class StartScreen extends Application {
         username.setLayoutX(screenSize.getWidth() / 2 - username.getLayoutBounds().getWidth() / 2);
     }
 
-    public void joinLobby() {
-        if (username.getText().trim().isEmpty()) {
-            showError("Username cannot be empty");
-        } else {
-            lobbyScreen = new LobbyScreen(screenSize, false);
-            lobbyScene = new Scene(lobbyScreen.getView(), screenSize.getWidth(), screenSize.getHeight());
-            addCss("src\\resources\\main.css", lobbyScene);
-            addCss("src\\resources\\chat.css", lobbyScene);
-            primaryStage.setScene(lobbyScene);
-        }
-    }
-
-    private void createLobby() {
-        if (username.getText().trim().isEmpty()) {
-            showError("Username cannot be empty");
-        } else {
-            lobbyScreen = new LobbyScreen(screenSize, true);
-            lobbyScene = new Scene(lobbyScreen.getView(), screenSize.getWidth(), screenSize.getHeight());
-            addCss("src\\resources\\main.css", lobbyScene);
-            addCss("src\\resources\\chat.css", lobbyScene);
-            primaryStage.setScene(lobbyScene);
-        }
-    }
-
-    public void showError(String errorMsg) {
-        errorText.setText(errorMsg);
-        double centerX = screenSize.getWidth() / 2 - errorText.getBoundsInLocal().getWidth() / 2;
-        errorText.setLayoutX(centerX);
-        errors++;
-        delay(3000, () -> {
-            if (errors-- == 1) errorText.setText("");
-        });
-    }
-
-    private void addCss(String url, Scene scene) {
-        File css = new File(url);
-        scene.getStylesheets().add("file:///" + css.getAbsolutePath().replace("\\", "/"));
-    }
 
     // function from https://stackoverflow.com/questions/26454149/make-javafx-wait-and-continue-with-code
     public static void delay(long millis, Runnable continuation) {

@@ -2,7 +2,11 @@ package dk.dtu.ui.components;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
+import dk.dtu.chat.ChatClient;
+import dk.dtu.network.Peer;
+import dk.dtu.ui.controllers.ChatController;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,17 +17,19 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 public class Chat {
-    private final VBox chatBox = new VBox(5); // 5 is the padding or smth like that
-    private List<Label> messages = new ArrayList<Label>();
+    private ChatController chatController;
+    public final VBox chatBox = new VBox(5); // 5 is the padding or smth like that
+    public List<Label> messages = new ArrayList<Label>();
     private Pane container = new Pane();
     private ScrollPane chatContainer = new ScrollPane();
     private int index = 0;
-    private String sender;
     private TextField messageInput = new TextField();
     private final int WIDTH = 800;
+    private Peer peer;
     
-    public Chat(String sender) {
-        this.sender = sender;
+    public Chat(ChatController chatClient, Peer peer) {
+        this.chatController = chatClient;
+        this.peer = peer;
         container.setPrefSize(WIDTH, 300);;
         chatContainer.setPrefSize(WIDTH, 200);
         chatContainer.getStyleClass().add("chat-container");
@@ -40,7 +46,7 @@ public class Chat {
 		messageInput.getStyleClass().add("message-field");
 		messageInput.setOnKeyPressed( event -> {
 			if (event.getCode() == KeyCode.ENTER) {
-				addMessage();
+				sendMessage();
 			}
 		});
 		Button sendMessage = new Button("Send");
@@ -48,26 +54,19 @@ public class Chat {
 		sendMessage.setLayoutY(205);
 		sendMessage.getStyleClass().add("send-message");
         sendMessage.setOnAction(event -> {
-		    addMessage();
+
+		    sendMessage();
 		});
         container.getChildren().addAll(chatContainer, messageInput, sendMessage);
+        chatClient.setChat(this);
     }
 
-    private boolean isNotEmpty(String message) {
-        return !message.trim().isEmpty();
+    public void sendMessage() {
+        chatController.sendChat(peer.name, peer.id, messageInput.getText());
+        messageInput.setText("");
     }
 
-    public void addMessage() {
-        String message = messageInput.getText();
-        if (isNotEmpty(message)) {
-            Label label = new Label("> " + sender + ": "  + message);
-            label.getStyleClass().add("chat-message");
-            messages.add(label);
-            messageInput.setText("");
-            chatBox.getChildren().add(messages.get(index));
-            index++;
-        }
-    }
+
 
     public Pane getView() {
         return container;

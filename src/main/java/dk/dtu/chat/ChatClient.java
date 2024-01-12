@@ -52,10 +52,9 @@ public class ChatClient {
                         continue;
                     }
 
-
                     String senderName = peer.getPeerName(senderId);
                     String privateOrPublic = messageTuple.getElementAt(Boolean.class, 2) ? "Global" : "Private";
-                    System.out.println(privateOrPublic + " "+ senderName + "#"+ senderId + ": " + message);
+                    showChat(privateOrPublic, senderName, senderId, message);
                 } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
                     Thread.currentThread().interrupt();
@@ -63,6 +62,10 @@ public class ChatClient {
                 }
             }
         }).start();
+    }
+
+    public void showChat(String privateOrPublic, String senderName, String senderId, String message) {
+        System.out.println(privateOrPublic + " "+ senderName + "#"+ senderId + ": " + message);
     }
     
     public void sendPeerIsMutedMsg(String peerId){
