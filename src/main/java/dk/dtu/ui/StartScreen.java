@@ -38,6 +38,7 @@ public class StartScreen extends Application {
     private TextField username;
     private int errors = 0;
     private LobbyScreen lobbyScreen;
+    private Scene lobbyScene;
 
     @Override
     public void start(Stage primaryStage) {
@@ -62,6 +63,7 @@ public class StartScreen extends Application {
         username = new TextField();
         username.setLayoutY(screenSize.getHeight() / 2 - 80);
         username.setPromptText("Username");
+        username.getStyleClass().add("username-field");
 
         Label header = new Label("Welcome to our Poker Game");
         header.getStyleClass().add("header");
@@ -97,8 +99,9 @@ public class StartScreen extends Application {
             showError("Username cannot be empty");
         } else {
             lobbyScreen = new LobbyScreen(screenSize, false);
-            Scene lobbyScene = new Scene(lobbyScreen.getView(), screenSize.getWidth(), screenSize.getHeight());
+            lobbyScene = new Scene(lobbyScreen.getView(), screenSize.getWidth(), screenSize.getHeight());
             addCss("src\\resources\\main.css", lobbyScene);
+            addCss("src\\resources\\chat.css", lobbyScene);
             primaryStage.setScene(lobbyScene);
         }
     }
@@ -108,8 +111,9 @@ public class StartScreen extends Application {
             showError("Username cannot be empty");
         } else {
             lobbyScreen = new LobbyScreen(screenSize, true);
-            Scene lobbyScene = new Scene(lobbyScreen.getView(), screenSize.getWidth(), screenSize.getHeight());
+            lobbyScene = new Scene(lobbyScreen.getView(), screenSize.getWidth(), screenSize.getHeight());
             addCss("src\\resources\\main.css", lobbyScene);
+            addCss("src\\resources\\chat.css", lobbyScene);
             primaryStage.setScene(lobbyScene);
         }
     }
@@ -125,7 +129,7 @@ public class StartScreen extends Application {
     }
 
     private void addCss(String url, Scene scene) {
-        File css = new File("src\\resources\\main.css");
+        File css = new File(url);
         scene.getStylesheets().add("file:///" + css.getAbsolutePath().replace("\\", "/"));
     }
 

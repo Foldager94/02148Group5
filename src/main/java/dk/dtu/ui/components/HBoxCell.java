@@ -12,17 +12,20 @@ import javafx.scene.layout.Priority;
 
 public class HBoxCell extends HBox {
     Label label = new Label();
-    Button button = new Button();
 
-    HBoxCell(String labelText, String buttonText) {
+    HBoxCell(String labelText, boolean host) {
         super();
 
         label.setText(labelText);
         label.setMaxWidth(Double.MAX_VALUE);
+        label.getStyleClass().add("list-label");
         HBox.setHgrow(label, Priority.ALWAYS);
-
-        button.setText(buttonText);
-
-        this.getChildren().addAll(label, button);
+        this.getChildren().add(label);
+        if (host) {
+            Button button = new Button();
+            button.setText("Kick");
+            button.getStyleClass().add("kick-button");
+            this.getChildren().add(button);
+        }
     }
 }
