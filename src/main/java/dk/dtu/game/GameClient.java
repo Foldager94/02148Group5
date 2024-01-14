@@ -216,6 +216,7 @@ public class GameClient {
         getCurrentRoundState().setPlayerFolded(peer.id);
         sendGlobalCommand(peer.getPeerIds(), "Action", foldAction.toJson());
         System.out.println("You Have Folded");
+        printToScreen(getCurrentRoundState().getGamePhaseType().toString());
     }
 
     public void makeCheckAction(){
@@ -231,6 +232,7 @@ public class GameClient {
             System.out.println("----\n"+allbets);
             System.out.println("You need to call the highest bet");
         }
+        printToScreen(getCurrentRoundState().getGamePhaseType().toString());
     }
 
     public boolean isOnlyPlayer() { // check if the player is the only player who have not folded
@@ -283,31 +285,45 @@ public class GameClient {
 
         p.balance -= toBeRaisedWith;
         getCurrentRoundState().addToPot(toBeRaisedWith);
-        Action raiseAction = new Action(peer.id, ActionType.Raise, toBeRaisedWith);
+        Action raiseAction = new Action(peer.id, ActionType.Raise, intAmount);
         sendGlobalCommand(peer.getPeerIds(), "Action", raiseAction.toJson());
+        printToScreen(getCurrentRoundState().getGamePhaseType().toString());
     }
     public void makeCallAction(){
         //TODO: Update own roundState, so balance and bets matches
         List<Integer> allbets = getCurrentRoundState().getBets();
-
         int myIndex = gameState.findPlayerIndexById(peer.id);
+        Player p = gameState.players.get(myIndex);
+
 
         int myBet = allbets.get(myIndex);
 
         int highestBet = Collections.max(allbets);
 
-        int myBetHighestBetDiff = highestBet - myBet; 
+        int myBetHighestBetDiff = highestBet - myBet;
 
-        Action callAction = new Action(peer.id, ActionType.Call, myBetHighestBetDiff);
 
-        allbets.set(myIndex, myBetHighestBetDiff);
-        Player p = gameState.players.get(myIndex);
+
         if(myBetHighestBetDiff> p.balance) {
             myBetHighestBetDiff=p.balance;
         }
+        getCurrentRoundState().getBets().set(myIndex, myBetHighestBetDiff);
+        p.removeFromBalance(myBetHighestBetDiff);
+        Action callAction = new Action(peer.id, ActionType.Call, myBetHighestBetDiff);
         getCurrentRoundState().addToPot(myBetHighestBetDiff);
         sendGlobalCommand(peer.getPeerIds(), "Action", callAction.toJson());
+        printToScreen(getCurrentRoundState().getGamePhaseType().toString());
 
+    }
+
+    public void printToScreen(String GamePhase){
+        clearScreen();
+        System.out.println(GamePhase);
+        System.out.println("Smallblind: " + getCurrentRoundState().getSmallBlind() + " | Bigblind: "  +getCurrentRoundState().getBigBlind());
+        System.out.println("Bets: " + getCurrentRoundState().getBets());
+        System.out.println("Pot: " + getCurrentRoundState().getPot());
+        System.out.println("CommunityCards: " + getCurrentRoundState().getCommunityCards());
+        System.out.println("HoleCards: " + getCurrentRoundState().getOwnPlayerObject().getHoleCards());
     }
     public void gameCommandHandler(String command){
         String[] commandTag = command.split(" ");

@@ -3,6 +3,7 @@ package dk.dtu.game.round;
 import dk.dtu.game.Player;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import dk.dtu.game.Card;
 import dk.dtu.game.commands.enums.GamePhaseType;
@@ -148,6 +149,8 @@ public class RoundState {
         calculateBlinds();
         Player SB = getPlayer(smallBlind);
         Player BB = getPlayer(bigBlind);
+        bets.set(Integer.parseInt(SB.id),smallBlindPrice);
+        bets.set(Integer.parseInt(BB.id),bigBlindPrice);
         pot = smallBlindPrice + bigBlindPrice;
         SB.removeFromBalance(smallBlindPrice);
         BB.removeFromBalance(bigBlindPrice);       
@@ -179,10 +182,17 @@ public class RoundState {
     
     public void calcPlayerRaise(String peerId, int amount){
         Player p = getPlayer(peerId);
-        p.removeFromBalance(amount);
-        addToPlayerBet(peerId, amount);
+
+        int topBet = Collections.max(bets);
+        int myBet = bets.get(findPlayerIndexById(peerId));
+        int amountNeededToCall = topBet - myBet;
+
+
+        p.removeFromBalance(amountNeededToCall+amount);
+        addToPlayerBet(peerId, amountNeededToCall+amount);
         lastRaise = peerId;
-        pot += amount;
+        pot += amount+amountNeededToCall;
+        System.out.println(pot);
         
     }
 
@@ -191,11 +201,17 @@ public class RoundState {
         return !p.getInRound();
     }
 
-    public void calcPlayerCall(String peerId, int amount){
+    public void calcPlayerCall(String peerId){
         Player p = getPlayer(peerId);
-        p.removeFromBalance(amount);
-        addToPlayerBet(peerId, amount);
-        pot += amount;
+        int topBet = Collections.max(bets);
+        int myBet = bets.get(findPlayerIndexById(peerId));
+        int amountNeededToCall = topBet - myBet;
+        if(amountNeededToCall > p.getBalance()){
+            amountNeededToCall = p.getBalance();
+        }
+        p.removeFromBalance(amountNeededToCall);
+        addToPlayerBet(peerId, amountNeededToCall);
+        pot += amountNeededToCall;
     }
 
     public String getNextNonFoldedPlayer(String peerId) {
