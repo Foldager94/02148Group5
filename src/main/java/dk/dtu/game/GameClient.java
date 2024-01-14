@@ -50,8 +50,13 @@ public class GameClient {
             }
         }).start();
     }
+    public void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
 
     public void initGame() {
+        clearScreen();
         addPlayerToGameState(peer.id);
         startGameCommandReceiver();
         connectToPeersGameSpace();
@@ -163,18 +168,10 @@ public class GameClient {
         gameState.resetDeck();
         List<String> PeerIds = peer.getPeerIds();
         List<Card> holeCards;
-        for(String id : PeerIds) { // the dealer deal 2 cards to each player
+        for(String id : PeerIds) { // the dealer deals 2 cards to each player
             holeCards = gameState.deck.draw(2);
             GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.PreFlop, holeCards);
             sendCommand(id, "GamePhase", gpCommand.toJson());
-        }
-        holeCards = gameState.deck.draw(2);
-        GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.PreFlop, holeCards);
-        try {
-            gameSpace.put("GamePhase", gpCommand.toJson());
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
     }
 
@@ -186,13 +183,6 @@ public class GameClient {
             GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.Flop, communityCards);
             sendCommand(id, "GamePhase", gpCommand.toJson());
         }
-        GamePhase ownCommand = new GamePhase(peer.id, GamePhaseType.Flop, communityCards);
-        try {
-            gameSpace.put("GamePhase", ownCommand.toJson());
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 
     public void initTurn(){
@@ -202,14 +192,6 @@ public class GameClient {
             GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.Turn, communityCards);
             sendCommand(id, "GamePhase", gpCommand.toJson());
         }
-        GamePhase ownCommand = new GamePhase(peer.id, GamePhaseType.Turn, communityCards);
-        try {
-            gameSpace.put("GamePhase", ownCommand.toJson());
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
     }
     public void initRiver(){
         List<Card> communityCards = gameState.deck.draw(1);
@@ -217,13 +199,6 @@ public class GameClient {
         for(String id : PeerIds) {
             GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.River, communityCards);
             sendCommand(id, "GamePhase", gpCommand.toJson());
-        }
-        GamePhase ownCommand = new GamePhase(peer.id, GamePhaseType.River, communityCards);
-        try {
-            gameSpace.put("GamePhase", ownCommand.toJson());
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
 
     }
@@ -248,7 +223,7 @@ public class GameClient {
         int myBet = allbets.get(myIndex);
         int highestBet = Collections.max(allbets);
         if(myBet ==highestBet){
-            Action checkAction = new Action(peer.id, ActionType.Check, myBet);
+            Action checkAction = new Action(peer.id, ActionType.Check, 0);
             sendGlobalCommand(peer.getPeerIds(), "Action", checkAction.toJson());
         } else {
             System.out.println("You need to call the highest bet");
@@ -257,7 +232,7 @@ public class GameClient {
 
     public boolean isOnlyPlayer() { // check if the player is the only player who have not folded
         for (Player player : gameState.currentRoundState.getPlayers()) {
-            if (player.id != peer.id && player.inRound) {
+            if (player.id.equals(peer.id) && player.inRound) {
                 return false;
             }
         }

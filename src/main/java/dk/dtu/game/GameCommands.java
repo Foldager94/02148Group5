@@ -1,5 +1,6 @@
 package dk.dtu.game;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.jspace.Tuple;
 
@@ -31,7 +32,7 @@ public class GameCommands{
     }
     
 
-    public void commandHandler(Tuple messageTuple, RoundState roundState) {
+    public void commandHandler(Tuple messageTuple, RoundState roundState) throws InterruptedException {
         String command = messageTuple.getElementAt(String.class, 0);
         String jsonObject = messageTuple.getElementAt(String.class, 1);
        
@@ -105,11 +106,12 @@ public class GameCommands{
         }
     }
 
-    public void connectionStatusCommand(String jsonObject, RoundState roundState){
+    public void connectionStatusCommand(String jsonObject, RoundState roundState) throws InterruptedException {
         ConnectionStatus connectionStatus = ConnectionStatus.fromJson(jsonObject);
         ConnectionStatus connectionStatusResponse;
         switch(connectionStatus.getConnectionStatus()){
             case Ping:
+                System.out.println("Ping From: " + connectionStatus.getSenderId());
                 String sendTo = connectionStatus.getSenderId();
                 String commandString = "ConnectionStatus";
                 String json = (new ConnectionStatus(getOwnId(), ConnectionStatusType.Pong)).toJson();
@@ -117,6 +119,7 @@ public class GameCommands{
                 break;
             case Pong:
                 addPlayerToGameState(connectionStatus.getSenderId());
+                System.out.println("Pong From: " + connectionStatus.getSenderId());
                 if(!gameClient.connectionEstablishedToAll()){ break;}
 
                 if(getOwnId().equals(getMPId())){ break; }
@@ -132,7 +135,9 @@ public class GameCommands{
                 break;
             case ConnectionsEstablished:
                 readyCount++;
+                System.out.println(connectionStatus.getSenderId()+ " is Ready.");
                 if(isEveryoneReady()){
+                    TimeUnit.SECONDS.sleep(10);
                     gameClient.startNewRound();
                 }
                 break;
