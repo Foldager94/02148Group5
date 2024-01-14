@@ -155,16 +155,20 @@ public class Peer {
                         new FormalField(String.class), // name
                         new FormalField(String.class) // uri
                     ));
-                    System.out.println("Recieved introduction");
                     String peerId = data.getElementAt(String.class, 1);
                     String peerName = data.getElementAt(String.class, 2);
                     String peerUri = data.getElementAt(String.class, 3);
+                    showRecievedIntroduction(peerId, peerName, peerUri);
                     peers.put(peerId, peerName, peerUri, false);
                     chat.addChatToRepo(peerId, peerUri);
                     chat.getPeerChat(peerId).put("response");
                 }
             } catch (Exception e) {System.out.println(e.getMessage());}
         }).start();
+    }
+
+    public void showRecievedIntroduction(String peerId, String peerName, String peerUri) {
+        System.out.println("Recieved introduction from " + peerName);
     }
 
     public String formatURI(String ip, String port) {

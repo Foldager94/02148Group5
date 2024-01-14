@@ -7,6 +7,7 @@ import dk.dtu.ui.components.Chat;
 import dk.dtu.ui.components.HBoxCell;
 import dk.dtu.ui.components.PlayersListView;
 import dk.dtu.ui.controllers.ChatController;
+import dk.dtu.ui.controllers.PeerController;
 import dk.dtu.ui.util.ScreenSize;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -21,13 +22,13 @@ public class LobbyScreen {
 	private Chat chat;
 	private Pane chatContainer;
 	private PlayersListView playersListView;
-	private Peer peer;
+	private PeerController peer;
 
 	private static Pane root = new Pane();
 
 	public LobbyScreen(ScreenSize screenSize, Peer peer) {
 		this.screenSize = screenSize;
-		this.peer = peer;
+		this.peer = (PeerController)peer;
 		initGraphics(false);
 	}
 
@@ -36,8 +37,7 @@ public class LobbyScreen {
 		header.setLayoutY(50);
 
 		header.getStyleClass().add("header");
-		ObservableList<String> names = FXCollections.observableArrayList("Alice", "Bob", "Chalie");
-		playersListView =  new PlayersListView(names, 8, host);
+		playersListView =  new PlayersListView(peer.peerNames, 8, host);
 		ListView<HBoxCell> listView = playersListView.getView();
 
 		listView.setLayoutX(100);
