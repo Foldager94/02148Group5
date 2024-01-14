@@ -1,4 +1,5 @@
 package dk.dtu.game;
+import dk.dtu.game.round.RoundState;
 import org.jspace.SequentialSpace;
 import org.jspace.Space;
 import org.jspace.SpaceRepository;
@@ -127,6 +128,10 @@ public class GameClient {
         gameState.currentRoundState.getOwnPlayerObject().setHoleCards(holeCards);
         gameState.currentRoundState.calculateBlindsBet();
         System.out.println(gameState.currentRoundState.toString());
+    }
+
+    public RoundState getCurrentRoundState(){
+        return gameState.currentRoundState;
     }
 
 }

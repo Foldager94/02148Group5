@@ -54,17 +54,30 @@ public class GameCommands{
         ConnectionStatus connectionStatusResponse;
         switch(connectionStatus.getConnectionStatus()){
             case Ping:
-                connectionStatusResponse = new ConnectionStatus(gameClient.peer.id, ConnectionStatusType.Pong);
-                gameClient.sendCommand(connectionStatus.getSenderId(), "ConnectionStatus", connectionStatusResponse.toJson());
+
+                String sendTo = connectionStatus.getSenderId();
+                String commandString = "ConnectionStatus";
+                String json = (new ConnectionStatus(getOwnId(), ConnectionStatusType.Pong)).toJson();
+                sendCommand(sendTo, commandString, json);
+
                 break;
             case Pong:
-                gameClient.addPlayerToGameState(connectionStatus.getSenderId());
-                if(gameClient.connectionEstablishedToAll()){
-                    connectionStatusResponse = new ConnectionStatus(gameClient.peer.id, ConnectionStatusType.ConnectionsEstablished);
-                    if(gameClient.peer.id != gameClient.peer.MPID){
-                        gameClient.sendCommand(gameClient.peer.MPID, "ConnectionStatus", connectionStatusResponse.toJson());
-                    }
-                }
+                addPlayerToGameState(connectionStatus.getSenderId());
+                if(!gameClient.connectionEstablishedToAll()){ break;}
+
+                if(getOwnId().equals(getMPId())){ break; }
+
+                connectionStatusResponse = new ConnectionStatus(
+                        getOwnId(),
+                        ConnectionStatusType.ConnectionsEstablished
+                );
+
+                sendCommand(
+                        getMPId(),
+                        "ConnectionStatus",
+                        connectionStatusResponse.toJson()
+                );
+
                 break;
             case ConnectionsEstablished:
                 readyCount++;
@@ -81,11 +94,16 @@ public class GameCommands{
         GamePhase gamePhase = GamePhase.fromJson(jsonObject);
         switch(gamePhase.getGamePhase()){
             case PreFlop:
-                gameClient.gameState.currentRoundState.getOwnPlayerObject().setHoleCards(gamePhase.getCards());
-                gameClient.gameState.currentRoundState.calculateBlindsBet();
-                System.out.println(gameClient.gameState.currentRoundState.toString());
+                setHoleCards(gamePhase.getCards());
+
+                calcBlindBets();
+
+                System.out.println(
+                        gameClient.gameState.currentRoundState.toString()
+                );
                 break;
             case Flop:
+
                 break;
             case Turn:
                 break;
@@ -103,7 +121,7 @@ public class GameCommands{
         //RoundStatus roundStatusResponse;
         switch (roundStatus.getRoundStatus()) {
             case NewRoundStarted:
-                gameClient.gameState.createNewRoundState(gameClient.peer.id);
+                createNewRoundState();
                 break;
 
             case RoundEnded: 
@@ -127,7 +145,37 @@ public class GameCommands{
         System.err.println("GameClient: Command unknown " +
         messageTuple.getElementAt(String.class, 0)+ ": "+ messageTuple.getElementAt(String.class, 1));
     }
-    
+
+
+    // Auxiliary functions
+    public void setHoleCards(List<Card> holeCards){
+        gameClient.gameState.currentRoundState.getOwnPlayerObject().setHoleCards(holeCards);
+    }
+
+    public void calcBlindBets(){
+        gameClient.gameState.currentRoundState.calculateBlindsBet();
+    }
+
+    public void createNewRoundState(){
+        gameClient.gameState.createNewRoundState(gameClient.peer.id);
+    }
+
+    public void sendCommand(String receiverId, String commandString, String json){
+        gameClient.sendCommand(receiverId, commandString, json);
+    }
+
+    public String getOwnId(){
+        return gameClient.peer.id;
+    }
+
+    public String getMPId(){
+        return gameClient.peer.MPID;
+    }
+
+    public void addPlayerToGameState(String playerId){
+        gameClient.addPlayerToGameState(playerId);
+    }
+
 }
  // private void preFlopCommand(String jsonObject, RoundState roundState) {
     //     // Implementer PreFlop logik her
