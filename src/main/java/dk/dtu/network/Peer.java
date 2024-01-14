@@ -1,6 +1,7 @@
 package dk.dtu.network;
 import dk.dtu.chat.ChatClient;
 import dk.dtu.game.GameClient;
+import dk.dtu.game.round.RoundLogic;
 
 import org.jspace.ActualField;
 import org.jspace.FormalField;
@@ -8,7 +9,6 @@ import org.jspace.RemoteSpace;
 import org.jspace.SequentialSpace;
 import org.jspace.SpaceRepository;
 import org.jspace.Tuple;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,7 +27,6 @@ public class Peer {
     public SpaceRepository remoteResp; // the peers remote repository(s)
     public SequentialSpace peers; // (id, name, uri, isMuted)
     //public SpaceRepository chats;  // contains all chats to the other peers
-    
     public String MPIP = "localhost";
     public String MPPort = "9004";
     public String MPID;
@@ -258,7 +257,11 @@ public class Peer {
             //     System.out.println("System: You are not allowed to start the game");
                 //break;
             case "/g":
+                // /g Check, /g Fold, /g raise <amount> /g call <amount>
                 //Game handler
+                game.gameCommandHandler(command);
+                break;
+
             default:
                 System.err.println("Unknown command.");
                 System.err.println("/p for private message");

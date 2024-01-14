@@ -10,7 +10,6 @@ import dk.dtu.game.round.RoundState;
 
 public class GameState {
     int roundId = 0;
-
     List<Player> players;
     Deck deck = new Deck();
     List<RoundState> history;
@@ -22,15 +21,16 @@ public class GameState {
         String dealer = getNewDealer();
         String smallBlind = getNewSmallBlind(dealer);
         String bigBlind = getNewBigBlind(smallBlind);
-        RoundState roundState = new RoundState(roundId, peerId, players, smallBlind , bigBlind, dealer);
+        String firstPlayer = getNewFirstPlayer(bigBlind);
+        RoundState roundState = new RoundState(roundId, peerId, players, smallBlind , bigBlind, dealer, firstPlayer);
         currentRoundState = roundState;
 
     }
     public void assignRoles() {
         if (players.size() >= 3) {
             // players.get(round % players.size()).assignDealer();
-            // players.get((round - 1) % players.size()).assignSmallBLind();
-            // players.get((round - 2) % players.size()).bigBLind();
+            // players.get((round - 1) % players.size()).assignSmallBlind();
+            // players.get((round - 2) % players.size()).bigBlind();
         } else {
         }
     }
@@ -62,10 +62,18 @@ public class GameState {
     public String getNewBigBlind(String smallBlind) {
         int smallBlindint= Integer.parseInt(smallBlind);
         int nextIndex = smallBlindint+1;
-            if(nextIndex < players.size()){
-                return players.get(nextIndex).id;
-            }
-            return players.get(0).id;
+        if(nextIndex < players.size()){
+            return players.get(nextIndex).id;
+        }
+        return players.get(0).id;
+    }
+    public String getNewFirstPlayer(String bigBlind) {
+        int bigBlindint= Integer.parseInt(bigBlind);
+        int nextIndex = bigBlindint+1;
+        if(nextIndex < players.size()){
+            return players.get(nextIndex).id;
+        }
+        return players.get(0).id;
     }
 
     public int findPlayerIndexById(String targetId) {
@@ -95,11 +103,21 @@ public class GameState {
     public void updatePlayerList() {
         players = currentRoundState.getPlayers();
     }
-
     
     public void updateGameState() {
         //TODO: update the gameState after round is finished
+        updateRound();
+        resetDeck();
+        removeLosingPlayers();
     }
+    
+    public void removeLosingPlayers(){
+         if (players != null) {
+        players.removeIf(player -> player.getBalance() <= 0);         
+         }
+    }
+
+
 
     public void addPlayer(Player player) {
         if(players == null){

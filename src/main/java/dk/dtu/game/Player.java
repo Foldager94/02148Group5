@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Player {
-    String id;
+    public String id;
     int balance;
     boolean inGame;
     boolean inRound;
@@ -16,6 +16,15 @@ public class Player {
         this.inGame = true;
         this.inRound = true;
     }
+
+    public int getBalance() {
+        return this.balance;
+    }
+
+    public boolean getInRound(){
+        return inRound;
+    }
+
 
     public String getId() {
         return this.id;
@@ -39,7 +48,6 @@ public class Player {
     public boolean isInGame() {
       return this.balance> 0 ? true: false;
     }
-
     public void fold()  {
         this.inRound=false;
     }
