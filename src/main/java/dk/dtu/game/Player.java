@@ -17,6 +17,7 @@ public class Player {
         this.inRound = true;
     }
 
+
     public int getBalance() {
         return this.balance;
     }
@@ -51,7 +52,6 @@ public class Player {
     public void fold()  {
         this.inRound=false;
     }
-
     @Override
     public String toString() {
         return "Player ID: " + id + " | Balance: " + balance + " | In Game: " + inGame + " | In Round: " + inRound

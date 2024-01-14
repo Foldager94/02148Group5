@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jspace.FormalField;
+import org.jspace.QueueSpace;
 import org.jspace.RemoteSpace;
 import dk.dtu.game.commands.ConnectionStatus;
 import dk.dtu.game.commands.GamePhase;
@@ -20,19 +21,19 @@ import dk.dtu.game.commands.enums.RoundStatusType;
 import dk.dtu.game.commands.Action;
 import static dk.dtu.game.GameSettings.*;
 import dk.dtu.network.Peer;
+
 public class GameClient {
-    public SequentialSpace gameSpace;
+    public QueueSpace gameSpace;
     public SpaceRepository gameSpaces;
     public Peer peer;
     public GameState gameState;
     public final GameCommands gameCommands = new GameCommands(this);
     public GameClient(Peer peer) {
-        gameSpace = new SequentialSpace();
+        gameSpace = new QueueSpace();
         gameSpaces = new SpaceRepository();
         gameState = new GameState();
         this.peer = peer;
     }
-    
     public void startGameCommandReceiver() {
         new Thread(() -> {
             while(true){
@@ -99,8 +100,9 @@ public class GameClient {
         }
     }
     public boolean connectionEstablishedToAll() {
-        return peer.chat.chats.size() == gameState.players.size();
+        return gameSpaces.size() == gameState.players.size();
     }
+
 
     public Space getPeerGameSpace(String peerId){
         return gameSpaces.get(peerId);
@@ -174,7 +176,7 @@ public class GameClient {
             sendCommand(id, "GamePhase", gpCommand.toJson());
         }
     }
-
+    
 
     public void initFlop(){
         List<Card> communityCards = gameState.deck.draw(3);
@@ -226,6 +228,7 @@ public class GameClient {
             Action checkAction = new Action(peer.id, ActionType.Check, 0);
             sendGlobalCommand(peer.getPeerIds(), "Action", checkAction.toJson());
         } else {
+            System.out.println("----\n"+allbets);
             System.out.println("You need to call the highest bet");
         }
     }
@@ -252,33 +255,57 @@ public class GameClient {
 
 
 
-    
-    
     public void makeRaiseAction(String amount){
+        RoundState currentRoundState = getCurrentRoundState();
         
         // If a player bets more than their balance, they are all in
 
         int intAmount = Integer.parseInt(amount);
-        RoundState currentRoundState = getCurrentRoundState();
-        List<Integer> allbets = currentRoundState.getBets();
+
+        List<Integer> allbets = getCurrentRoundState().getBets();
+
         int myIndex = gameState.findPlayerIndexById(peer.id);
+
         int myBet = allbets.get(myIndex);
+
         int highestBet = Collections.max(allbets);
+
         int myBetHighestBetDiff = highestBet - myBet; 
+
         int toBeRaisedWith = myBetHighestBetDiff+intAmount;
+        allbets.set(myIndex, myBet+toBeRaisedWith);
+        
+        
         Player p = gameState.players.get(myIndex);
         if(toBeRaisedWith> p.balance) {
             toBeRaisedWith=p.balance;
         }
 
         p.balance -= toBeRaisedWith;
-
+        getCurrentRoundState().addToPot(toBeRaisedWith);
         Action raiseAction = new Action(peer.id, ActionType.Raise, toBeRaisedWith);
         sendGlobalCommand(peer.getPeerIds(), "Action", raiseAction.toJson());
     }
     public void makeCallAction(){
         //TODO: Update own roundState, so balance and bets matches
-        Action callAction = new Action(peer.id, ActionType.Call, 0);
+        List<Integer> allbets = getCurrentRoundState().getBets();
+
+        int myIndex = gameState.findPlayerIndexById(peer.id);
+
+        int myBet = allbets.get(myIndex);
+
+        int highestBet = Collections.max(allbets);
+
+        int myBetHighestBetDiff = highestBet - myBet; 
+
+        Action callAction = new Action(peer.id, ActionType.Call, myBetHighestBetDiff);
+
+        allbets.set(myIndex, myBetHighestBetDiff);
+        Player p = gameState.players.get(myIndex);
+        if(myBetHighestBetDiff> p.balance) {
+            myBetHighestBetDiff=p.balance;
+        }
+        getCurrentRoundState().addToPot(myBetHighestBetDiff);
         sendGlobalCommand(peer.getPeerIds(), "Action", callAction.toJson());
 
     }

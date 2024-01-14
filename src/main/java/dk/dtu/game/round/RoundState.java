@@ -46,6 +46,10 @@ public class RoundState {
         return players;
     }
 
+    public void addToPot(int amount){
+        pot += amount;
+    }
+
     public int getPot(){
         return pot;
     }
@@ -61,8 +65,6 @@ public class RoundState {
        int bet2bAdded = addBet(bet);
        bets.add(bet2bAdded);
        return bets;
-
-
     }
 
     public String getFirstPlayerId(){
@@ -87,7 +89,6 @@ public class RoundState {
         return gamePhaseType;
     }
 
-
     public int getroundId() {
         return roundId;
     }
@@ -106,6 +107,10 @@ public class RoundState {
 
     public String getLastRaise(){
         return lastRaise;
+    }
+
+    public void setLastRaise(String lastRaise){
+        this.lastRaise =lastRaise;
     }
 
     public List<Card> getCommunityCards(){
@@ -181,13 +186,28 @@ public class RoundState {
         
     }
 
+    public boolean hasPlayerFolded(String peerId){
+        Player p = getPlayer(peerId);
+        return !p.getInRound();
+    }
+
     public void calcPlayerCall(String peerId, int amount){
         Player p = getPlayer(peerId);
         p.removeFromBalance(amount);
         addToPlayerBet(peerId, amount);
         pot += amount;
     }
-    
+
+    public String getNextNonFoldedPlayer(String peerId) {
+        String nextId = peerId;
+        while (true) {
+            nextId = nextPlayer(nextId);
+            if (getPlayer(nextId).getInRound()) {
+                return nextId;
+            }
+        }
+
+    }
     
     public void addToPlayerBet(String peerId, int amount){
         int pIndex = findPlayerIndexById(peerId);

@@ -15,7 +15,6 @@ public class GameState {
     List<RoundState> history;
     RoundState currentRoundState;
     
-
     public void createNewRoundState(String peerId) {
         updateRound();
         String dealer = getNewDealer();
