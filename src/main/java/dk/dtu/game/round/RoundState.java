@@ -203,9 +203,14 @@ public class RoundState {
 
     public void calcPlayerCall(String peerId){
         Player p = getPlayer(peerId);
+
+
         int topBet = Collections.max(bets);
         int myBet = bets.get(findPlayerIndexById(peerId));
         int amountNeededToCall = topBet - myBet;
+
+        
+        System.out.println(topBet+ " " + myBet + " " + amountNeededToCall);
         if(amountNeededToCall > p.getBalance()){
             amountNeededToCall = p.getBalance();
         }
@@ -227,6 +232,7 @@ public class RoundState {
     
     public void addToPlayerBet(String peerId, int amount){
         int pIndex = findPlayerIndexById(peerId);
+        System.out.println("YOU HAVE NOW BETTER: " + amount + bets.get(pIndex));
         bets.set(pIndex, amount + bets.get(pIndex));
     }
 
