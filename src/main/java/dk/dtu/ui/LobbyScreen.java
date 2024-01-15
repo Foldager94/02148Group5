@@ -22,13 +22,14 @@ public class LobbyScreen {
 	private Chat chat;
 	private Pane chatContainer;
 	private PlayersListView playersListView;
-	private PeerController peer;
+	private Peer peer;
 
 	private static Pane root = new Pane();
 
-	public LobbyScreen(ScreenSize screenSize, Peer peer) {
+	public LobbyScreen(ScreenSize screenSize, Peer peer, PlayersListView listView) {
 		this.screenSize = screenSize;
-		this.peer = (PeerController)peer;
+		this.peer = peer;
+		this.playersListView = listView;
 		initGraphics(false);
 	}
 
@@ -37,17 +38,15 @@ public class LobbyScreen {
 		header.setLayoutY(50);
 
 		header.getStyleClass().add("header");
-		playersListView =  new PlayersListView(peer.peerNames, 8, host);
 		ListView<HBoxCell> listView = playersListView.getView();
 
 		listView.setLayoutX(100);
 		listView.setLayoutY(150);
 
-		chat = new Chat((ChatController)peer.chat, peer);
+		chat = new Chat(getChat(peer), peer);
 		chatContainer = chat.getView();
 		chatContainer.setLayoutX(100);
 		chatContainer.setLayoutY(150 + playersListView.getHeight() + 10);
-		
 
 		root.getChildren().addAll(listView, header, chatContainer);
 		root.getStyleClass().add("pane");
@@ -56,6 +55,15 @@ public class LobbyScreen {
 			header.setLayoutX(this.screenSize.getWidth() / 2 - header.getLayoutBounds().getWidth() / 2);
 		});
 	}
+
+	public Peer getPeer() {
+		return peer;
+	}
+
+	public ChatController getChat(Peer peer) {
+		return (ChatController)(peer.chat);
+	}
+
 
 	public Parent getView() {
 		return root;

@@ -30,7 +30,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class StartScreen extends Application {
-    private ScreenSize screenSize = new ScreenSize(1200, 800);
+    private ScreenSize screenSize = new ScreenSize(1200, 700);
 
 	private Stage primaryStage;
     private Scene scene;

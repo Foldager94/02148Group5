@@ -7,6 +7,7 @@ import dk.dtu.network.MasterPeer;
 import dk.dtu.network.Peer;
 import dk.dtu.ui.CreateLobbyScreen;
 import dk.dtu.ui.LobbyScreen;
+import dk.dtu.ui.components.PlayersListView;
 import dk.dtu.ui.util.ScreenSize;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
@@ -37,12 +38,14 @@ public class StartController {
         if (username.trim().isEmpty()) {
             showError("Username cannot be empty");
         } else {
-            Peer p = new PeerController(username, String.valueOf((new Random().nextInt(10000 - 6000 + 1) + 6000)));
+            PlayersListView list = new PlayersListView(8, false);
+            list.addName(username);
+            PeerController p = new PeerController(username, list, String.valueOf((new Random().nextInt(10000 - 6000 + 1) + 6000)));
             p.connectToMP();
             p.sendIntroduction();
             p.getIntroduction();
             p.startMessageReciever();
-            LobbyScreen lobbyScreen = new LobbyScreen(screenSize, p);
+            LobbyScreen lobbyScreen = new LobbyScreen(screenSize, p, list);
             Scene lobbyScene = new Scene(lobbyScreen.getView(), screenSize.getWidth(), screenSize.getHeight());
             addCss("src\\resources\\main.css", lobbyScene);
             addCss("src\\resources\\chat.css", lobbyScene);
@@ -54,12 +57,14 @@ public class StartController {
         if (username.trim().isEmpty()) {
             showError("Username cannot be empty");
         } else {
-            MasterPeer mp = new MasterPeerController(username);
+            PlayersListView list = new PlayersListView(8, false);
+            list.addName(username);
+            MasterPeer mp = new MasterPeerController(username, list);
             mp.awaitLobbyRequest();
             mp.awaitReadyFlags();
             mp.getIntroduction();
             mp.startMessageReciever();
-            CreateLobbyScreen lobbySreen = new CreateLobbyScreen(screenSize, mp);
+            CreateLobbyScreen lobbySreen = new CreateLobbyScreen(screenSize, mp, list);
             Scene lobbyScene = new Scene(lobbySreen.getView(), screenSize.getWidth(), screenSize.getHeight());
             addCss("src\\resources\\main.css", lobbyScene);
             addCss("src\\resources\\chat.css", lobbyScene);

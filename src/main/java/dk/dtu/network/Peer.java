@@ -97,15 +97,15 @@ public class Peer {
     }
 
     public void connectToPeers(List<ArrayList<Object>> peerList) throws InterruptedException{
-            for (ArrayList<Object> peer : peerList) {
-                System.out.println(peer.toString());
-                String peerId   = (String)peer.get(0);
-                String peerName = (String)peer.get(1);
-                String peerUri  = (String)peer.get(2);
-                Boolean isMuted = false;
-                peers.put(peerId, peerName, peerUri, isMuted);
-                System.out.println("Trying to connect to: " + peerUri);
-                chat.addChatToRepo(peerId,peerUri);
+        for (ArrayList<Object> peer : peerList) {
+            System.out.println(peer.toString());
+            String peerId   = (String)peer.get(0);
+            String peerName = (String)peer.get(1);
+            String peerUri  = (String)peer.get(2);
+            Boolean isMuted = false;
+            peers.put(peerId, peerName, peerUri, isMuted);
+            showTryingtoConnectToPear(peerId, peerName, peerUri);
+            chat.addChatToRepo(peerId,peerUri);
         }
     }
 
@@ -169,6 +169,10 @@ public class Peer {
 
     public void showRecievedIntroduction(String peerId, String peerName, String peerUri) {
         System.out.println("Recieved introduction from " + peerName);
+    }
+
+    public void showTryingtoConnectToPear(String peerId, String peerName, String peerUri) {
+        System.out.println("Trying to connect to: "  + peerName + " @" + peerUri);
     }
 
     public String formatURI(String ip, String port) {
