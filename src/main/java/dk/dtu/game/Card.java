@@ -1,5 +1,7 @@
 package dk.dtu.game;
 
+// card images from https://opengameart.org/content/playing-cards-vector-png
+
 public class Card implements Comparable<Card> {
     private int value;
     private Suit suit;
@@ -9,20 +11,28 @@ public class Card implements Comparable<Card> {
         this.suit = suit;
     }
 
-    public int getValue(){
+    public int getValue() {
         return value;
-        }
-    public void setValue(int value){
+    }
+
+    public void setValue(int value) {
         this.value = value;
-        }
+    }
+
     public Suit getSuit(){
         return suit;
-        }
-    public void setSuit(Suit suit){
+    }
+
+    public void setSuit(Suit suit) {
         this.suit = suit;
-        }
+    }
+
+    public String getImageUrl() {
+        return String.valueOf(value) + "_of_" + suit + ".png";
+    }
+    
         
-     public String toString(){
+     public String toString() {
         String valueStr;
         switch (this.value) {
             case 2: valueStr = "Two";
@@ -63,7 +73,7 @@ public class Card implements Comparable<Card> {
     }
 
     @Override
-    public boolean equals(Object obj){
+    public boolean equals(Object obj) {
         if (obj.getClass().equals(getClass())) {
             Card temp = (Card) obj;
             if ((temp.value == this.value) && (temp.suit == this.suit)) {

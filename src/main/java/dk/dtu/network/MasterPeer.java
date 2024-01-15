@@ -6,23 +6,44 @@ import java.util.LinkedList;
 
 
 public class MasterPeer extends Peer {
+    public final int MAX_LOBBY_SIZE = 8;
+	SequentialSpace MPrequests;
+    SequentialSpace MPreadyFlags;
+    SequentialSpace locks;
+    
+    public int idTracker = 0;
     public MasterPeer(String name) {
 		super(name, "9004");
         this.id = generateNewPeerId();
         this.MPID = this.id;
         addMasterToOwnPeers();
-		//TODO Auto-generated constructor stub
+        try {
+            locks.put("lock");
+        } catch (Exception e) {}
         // initSpaces();
 	}
 
-    public final int MAX_LOBBY_SIZE = 8;
+    @Override
+    public void setIpAndPort() {
+        try {
+            // Dotenv dotenv = null;
+            // dotenv = Dotenv.configure().load();
+            // System.out.println(dotenv.get("MPIP"));
+            ip = MPIP;
+            uri = formatURI(ip, port);
+            // ip = Inet4Address.getLocalHost().getHostAddress().toString();
+        } catch (Exception e) {}
+    }
 
-
-	SequentialSpace MPrequests;
-    SequentialSpace MPreadyFlags;
-    
-    public int idTracker = 0;
-
+    @Override
+    public void addPeer(String peerId, String peerName, String peerUri) {
+        try {
+            super.addPeer(peerId, peerName, peerUri);
+            if (locks.getp(new ActualField("missing " + peerId)) != null) {
+                locks.put("loginLock");
+            }
+        } catch (Exception e) {}
+    }
 
     // Get a join request
     // Retrieve all the piers that are connected
@@ -32,9 +53,10 @@ public class MasterPeer extends Peer {
             while (true) {
                 try {
                     // await join request from requests space. Object[] = {"Helo", Name, IP:PORT}
-                    Object[] info = MPrequests.get(new ActualField("Helo"), new FormalField(String.class), new FormalField(String.class));
+                    locks.get(new ActualField("loginLock"));
                     String peerId = generateNewPeerId();
-
+                    locks.put("missing " + peerId);
+                    Object[] info = MPrequests.get(new ActualField("Helo"), new FormalField(String.class), new FormalField(String.class));
                     // Peer class should take care of this?
                     // Add peer to MB's Peers space. {Id, Name, Ip:port}
                     //peers.put(peerId,info[1],info[2]);
@@ -47,7 +69,6 @@ public class MasterPeer extends Peer {
                         continue;
                     }
                     MPrequests.put("Approved", info[2]);
-
                     MPrequests.put("Helo", this.id, peerId, peers, info[2]);
                 
                 } catch (InterruptedException e) {
@@ -130,6 +151,9 @@ public class MasterPeer extends Peer {
             remoteResp.add("requests", MPrequests);
             remoteResp.add("ready", MPreadyFlags);
             remoteResp.addGate(formatURI(ip, port) + "/?keep");
+            
+            locks = new SequentialSpace();
+            locks.put("loginLock");
         } catch(Exception e) {
             System.out.println("MP initSpaces: " + e.getMessage());
         }

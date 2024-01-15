@@ -27,7 +27,6 @@ public class ClientMain {
             UUID uuid = UUID.randomUUID();
             //System.out.print("Enter your name: ");
             String name;
-            
             while (true) {
                 name = input.readLine();
                 players.put("insertName", uuid.toString(), name);
@@ -57,6 +56,4 @@ public class ClientMain {
             e.printStackTrace();
         }
     }
-
-
 }

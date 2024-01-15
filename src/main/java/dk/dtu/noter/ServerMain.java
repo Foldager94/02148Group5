@@ -16,8 +16,7 @@ public class ServerMain {
             System.out.println(InetAddress.getLocalHost());
 
             BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-            String uri = "tcp://127.0.0.1:9001/?keep";
-
+            String uri = "tcp://localhost:9001/?keep";
             URI myUri = new URI(uri);
             String gateUri = "tcp://" + myUri.getHost() + ":" + myUri.getPort() +  "?keep" ;
             // Create a repository

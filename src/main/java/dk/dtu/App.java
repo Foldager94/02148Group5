@@ -1,8 +1,14 @@
 package dk.dtu;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
+
+import org.jspace.FormalField;
+import org.jspace.SequentialSpace;
+import org.jspace.Space;
+import java.io.BufferedReader;
 
 import dk.dtu.network.MasterPeer;
 import dk.dtu.network.Peer;
@@ -16,10 +22,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import dk.dtu.ui.LobbyScreen;
+import dk.dtu.ui.StartScreen;
+import javafx.application.Application;
 
-public class App 
-{
-    public static void main( String[] args ) throws IOException
+
+public class App {
+    
+    // public static void main(String[] args) {
+    //     Application.launch(StartScreen.class, args);
+    // }   
+        public static void main( String[] args ) throws IOException
     {
         // testSpecificHand();
         for (int i = 0; i < 10; i++) {
@@ -52,6 +65,7 @@ public class App
         }
     }
 
+
     private static void initMp(String name) throws IOException{
         MasterPeer mp = new MasterPeer(name);
         mp.awaitLobbyRequest();
@@ -62,7 +76,6 @@ public class App
             mp.commandHandler();
         }
     }
-
     private static void initP(String name, String port) throws IOException {
         Peer p = new Peer(name, port);
         p.connectToMP();
