@@ -3,6 +3,7 @@ package dk.dtu.game.round;
 import dk.dtu.game.Player;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import dk.dtu.game.Card;
 import dk.dtu.game.commands.enums.GamePhaseType;
@@ -23,6 +24,7 @@ public class RoundState {
     private String lastRaise = null;
     private String firstPlayer = null;
     private GamePhaseType gamePhaseType = null;
+    boolean isMyTurn = false;
 
     public RoundState(int roundId, String peerId, List<Player> players, String smallBlind, String bigBlind, String dealer, String firstPlayer){
         this.roundId = roundId;
@@ -148,9 +150,11 @@ public class RoundState {
         calculateBlinds();
         Player SB = getPlayer(smallBlind);
         Player BB = getPlayer(bigBlind);
+        bets.set(Integer.parseInt(SB.id),smallBlindPrice);
+        bets.set(Integer.parseInt(BB.id),bigBlindPrice);
         pot = smallBlindPrice + bigBlindPrice;
         SB.removeFromBalance(smallBlindPrice);
-        BB.removeFromBalance(bigBlindPrice);       
+        BB.removeFromBalance(bigBlindPrice);
     }
 
     public void setNewFirstPlayer(String previousFirstId){ // called if the previos first player folds
@@ -179,11 +183,25 @@ public class RoundState {
     
     public void calcPlayerRaise(String peerId, int amount){
         Player p = getPlayer(peerId);
-        p.removeFromBalance(amount);
-        addToPlayerBet(peerId, amount);
+
+        int topBet = Collections.max(bets);
+        int myBet = bets.get(findPlayerIndexById(peerId));
+        int amountNeededToCall = topBet - myBet;
+
+
+        p.removeFromBalance(amountNeededToCall+amount);
+        addToPlayerBet(peerId, amountNeededToCall+amount);
         lastRaise = peerId;
-        pot += amount;
+        pot += amount+amountNeededToCall;
+        System.out.println(pot);
         
+    }
+
+    public boolean getIsMyTurn(){
+        return isMyTurn;
+    }
+    public void setIsMyTurn(boolean val){
+        isMyTurn = val;
     }
 
     public boolean hasPlayerFolded(String peerId){
@@ -191,11 +209,22 @@ public class RoundState {
         return !p.getInRound();
     }
 
-    public void calcPlayerCall(String peerId, int amount){
+    public void calcPlayerCall(String peerId){
         Player p = getPlayer(peerId);
-        p.removeFromBalance(amount);
-        addToPlayerBet(peerId, amount);
-        pot += amount;
+
+
+        int topBet = Collections.max(bets);
+        int myBet = bets.get(findPlayerIndexById(peerId));
+        int amountNeededToCall = topBet - myBet;
+
+        
+        System.out.println(topBet+ " " + myBet + " " + amountNeededToCall);
+        if(amountNeededToCall > p.getBalance()){
+            amountNeededToCall = p.getBalance();
+        }
+        p.removeFromBalance(amountNeededToCall);
+        addToPlayerBet(peerId, amountNeededToCall);
+        pot += amountNeededToCall;
     }
 
     public String getNextNonFoldedPlayer(String peerId) {
@@ -211,6 +240,7 @@ public class RoundState {
     
     public void addToPlayerBet(String peerId, int amount){
         int pIndex = findPlayerIndexById(peerId);
+        System.out.println("YOU HAVE NOW BETTER: " + amount + bets.get(pIndex));
         bets.set(pIndex, amount + bets.get(pIndex));
     }
 

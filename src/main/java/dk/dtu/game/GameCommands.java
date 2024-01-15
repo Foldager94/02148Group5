@@ -26,9 +26,9 @@ public class GameCommands{
         String jsonObject = messageTuple.getElementAt(String.class, 1);
        
         switch (command) {
-            case "Action": actionCommand(jsonObject, roundState); break;
-            case "ConnectionStatus": connectionStatusCommand(jsonObject, roundState); break;
-            case "GamePhase": gamePhaseCommand(jsonObject, roundState); break;
+            case "Action": actionCommand(jsonObject); break;
+            case "ConnectionStatus": connectionStatusCommand(jsonObject); break;
+            case "GamePhase": gamePhaseCommand(jsonObject); break;
             case "SyncState": syncStateCommand(jsonObject, roundState); break;
             case "RoundStatus": roundStatusCommand(jsonObject, roundState); break;
             default: unknownCommand(messageTuple); break;
@@ -37,7 +37,7 @@ public class GameCommands{
     }
 
     // function to hande an incoming action from another player
-    public void actionCommand(String jsonObject, RoundState roundState){
+    public void actionCommand(String jsonObject){
         Action action = Action.fromJson(jsonObject);
         switch(action.getAction()){
             case Fold:
@@ -49,56 +49,61 @@ public class GameCommands{
                 if (gameClient.isOnlyPlayer()) {
                     System.out.println("You are the last player, you have won! (TODO)");
                 }
-                if(!isLastPlayer(action.getSenderId())){
-                    if(isMyTurn(action.getSenderId())) { // check if its now the players turn
-                        System.out.println("Make a Move");
-                    }
-                } else if(isFirstPlayer(action.getSenderId())){ // 
-                    System.out.println("Ready for dealer to turn card(s)");
-                    if(getOwnId().equals(getDealerId())){
+                if(getOwnId().equals(getDealerId())){
+                    if(!isLastPlayer(action.getSenderId())){  // if the sender was not the last player
+                        gameClient.sendPlayerTurnCommand(action.getSenderId());
+                    } else if(isLastPlayer(action.getSenderId())){ // else if the sender was the last player
+                        System.out.println("Ready for Flop"); // goto next phase
+
                         gameClient.initNextPhase();
                     }
                 }
+                printToScreen(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+                System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 break;
             case Raise:
                 gameClient.getCurrentRoundState().calcPlayerRaise(action.getSenderId(), action.getAmount());
                 gameClient.getCurrentRoundState().setLastRaise(action.getSenderId());
-                if(isMyTurn(action.getSenderId())) { // check if its now the players turn
-                    System.out.println("Make a Move");
+                if(getOwnId().equals(getDealerId())){
+                    gameClient.sendPlayerTurnCommand(action.getSenderId());
                 }
+                printToScreen(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+                System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() + (action.getAmount()!=0 ?" " +action.getAmount():"" ));
             break;
 
             case Check:
-                if(!isLastPlayer(action.getSenderId())){  // if the sender was not the last player
-                    if(isMyTurn(action.getSenderId())) { // check if its now the players turn
-                        System.out.println("Make a Move");
-                    }
-                } else if(isLastPlayer(action.getSenderId())){ // else if the sender was the last player
-                    System.out.println("Ready for Flop"); // goto next phase
-                    if(getOwnId().equals(getDealerId())){
+                if(getOwnId().equals(getDealerId())){
+                    if(!isLastPlayer(action.getSenderId())){  // if the sender was not the last player
+                        gameClient.sendPlayerTurnCommand(action.getSenderId());
+                    } else if(isLastPlayer(action.getSenderId())){ // else if the sender was the last player
+                        System.out.println("Ready for Flop"); // goto next phase
+
                         gameClient.initNextPhase();
                     }
                 }
+                printToScreen(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+                System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 break;
             case Call:
-                gameClient.getCurrentRoundState().calcPlayerCall(action.getSenderId(), action.getAmount());
-                if(!isLastPlayer(action.getSenderId())){
-                    if(isMyTurn(action.getSenderId())) { // check if its now the players turn
-                        System.out.println("Make a Move");
-                    }
-                } else if(isFirstPlayer(action.getSenderId())){
-                    System.out.println("Ready for Flop");
-                    if(getOwnId().equals(getDealerId())){
-                        gameClient.initNextPhase();
+                gameClient.getCurrentRoundState().calcPlayerCall(action.getSenderId());
+                if(getOwnId().equals(getDealerId())){
+                    if(!isLastPlayer(action.getSenderId())){  // if the sender was not the last player
+                            gameClient.sendPlayerTurnCommand(action.getSenderId());
+                    } else if(isLastPlayer(action.getSenderId())){ // else if the sender was the last player
+                        System.out.println("Ready for Flop"); // goto next phase
+
+                            gameClient.initNextPhase();
                     }
                 }
+                printToScreen(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+                System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 break;
             default:
                 break;
         }
     }
 
-    public void connectionStatusCommand(String jsonObject, RoundState roundState) throws InterruptedException {
+    public void connectionStatusCommand(String jsonObject) throws InterruptedException {
         ConnectionStatus connectionStatus = ConnectionStatus.fromJson(jsonObject);
         ConnectionStatus connectionStatusResponse;
         switch(connectionStatus.getConnectionStatus()){
@@ -143,19 +148,21 @@ public class GameCommands{
     } 
     
 
-    public void gamePhaseCommand(String jsonObject, RoundState roundState){
+    public void gamePhaseCommand(String jsonObject){
         GamePhase gamePhase = GamePhase.fromJson(jsonObject);
         switch(gamePhase.getGamePhase()){
             case PreFlop:
+                setGamePhaseType(GamePhaseType.PreFlop);
                 setHoleCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
-                printToScreen("PreFlop");
                 calcBlindBets();
+                printToScreen("PreFlop");
                 if(isFirstPlayer(getOwnId())) {
                     System.out.println("Make a bet");
                 }
                 break;
             case Flop:
+                setGamePhaseType(GamePhaseType.Flop);
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
                 printToScreen("Flop");
@@ -164,6 +171,7 @@ public class GameCommands{
                 }
                 break;
             case Turn:
+                setGamePhaseType(GamePhaseType.Turn);
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
                 printToScreen("Turn");
@@ -172,6 +180,7 @@ public class GameCommands{
                 }
                 break;
             case River:
+                setGamePhaseType(GamePhaseType.River);
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
                 printToScreen("River");
@@ -180,7 +189,9 @@ public class GameCommands{
                 }
                 break;
             case Showdown:
+                setGamePhaseType(GamePhaseType.Showdown);
                 // Calculate best hand
+                // Send Best Hand To Dealer
             default:
                 break;
                 
@@ -228,7 +239,9 @@ public class GameCommands{
             case RoundEnded: 
 
                 break;
-    
+            case PlayerTurn:
+                gameClient.getCurrentRoundState().setIsMyTurn(true);
+                System.out.println("It is your turn to make a move");
             default:
                 break;
         }
@@ -292,13 +305,14 @@ public class GameCommands{
     public void clearScreen() {  
         System.out.print("\033[H\033[2J");  
         System.out.flush();  
-    }  
+    }
+
 
     public void printToScreen(String GamePhase){
         clearScreen();
         System.out.println(GamePhase);
-        System.out.println("First player is " + gameClient.getCurrentRoundState().getFirstPlayerId());
         System.out.println("Smallblind: " + gameClient.getCurrentRoundState().getSmallBlind() + " | Bigblind: "  +gameClient.getCurrentRoundState().getBigBlind());
+        System.out.println("Bets: " + gameClient.getCurrentRoundState().getBets());
         System.out.println("Pot: " + gameClient.getCurrentRoundState().getPot());
         System.out.println("CommunityCards: " + gameClient.getCurrentRoundState().getCommunityCards());
         System.out.println("HoleCards: " + gameClient.getCurrentRoundState().getOwnPlayerObject().getHoleCards());
