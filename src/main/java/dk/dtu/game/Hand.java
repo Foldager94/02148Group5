@@ -12,15 +12,19 @@ public class Hand implements Comparable<Hand> {
     private List<Card> cards;
     private List<Integer> hand;
 
+    public Hand(List<Card> allCards) {
+        Collections.sort(allCards);
+        hand = determineHand(allCards);
+    }
+
     public Hand(List<Card> communityCards, List<Card> holeCards)  {
         cards = List.copyOf(communityCards);
         cards.addAll(holeCards);
         Collections.sort(cards);
-        hand = determineHand();
-        
+        hand = determineHand(cards);
     }
 
-    public List<Integer> determineHand() {
+    public List<Integer> determineHand(List<Card> cards) {
         List<Integer> handAttempt;
         handAttempt = isRoyalFlush(cards);
         if (handAttempt != null) {
@@ -34,31 +38,31 @@ public class Hand implements Comparable<Hand> {
         if (handAttempt != null) {
             return handAttempt;
         }
-        handAttempt = isRoyalFlush(cards);
+        handAttempt = isFullHouse(cards);
         if (handAttempt != null) {
             return handAttempt;
         }
-        handAttempt = isRoyalFlush(cards);
+        handAttempt = isFlush(cards);
         if (handAttempt != null) {
             return handAttempt;
         }
-        handAttempt = isRoyalFlush(cards);
+        handAttempt = isStraight(cards);
         if (handAttempt != null) {
             return handAttempt;
         }
-        handAttempt = isRoyalFlush(cards);
+        handAttempt = isThreeOfAKind(cards);
         if (handAttempt != null) {
             return handAttempt;
         }
-        handAttempt = isRoyalFlush(cards);
+        handAttempt = isTwoPair(cards);
         if (handAttempt != null) {
             return handAttempt;
         }
-        handAttempt = isRoyalFlush(cards);
+        handAttempt = isOnePair(cards);
         if (handAttempt != null) {
             return handAttempt;
         }
-        handAttempt = isRoyalFlush(cards);
+        handAttempt = isHighCard(cards);
         if (handAttempt != null) {
             return handAttempt;
         }
@@ -74,7 +78,6 @@ public class Hand implements Comparable<Hand> {
             if (cards.containsAll(royalFlush)) {
                 return List.of(9);
             }
-
         }
         return null;
     }
@@ -116,17 +119,20 @@ public class Hand implements Comparable<Hand> {
         }
         return null;
     }
+
     public List<Integer> isFullHouse(List<Card> cards) {
         int count;
-        for (int val = 2 ; val < 15; val++) {
+        for (int val = 14 ; val > 1; val--) {
             count = 0;
             for (Card card : cards) {
-                if (card.getValue() == val) { count++; }
+                if (card.getValue() == val) {
+                    count++;
+                }
                 if (count == 3) { 
                     int threeVal = val;
-                    for (int i = 0; i < 6; i++) {
+                    for (int i = 6; i > 2; i--) {
                         int pairVal = cards.get(i).getValue();
-                        if (threeVal != pairVal && (pairVal == cards.get(i + 1).getValue())) {
+                        if (threeVal != pairVal && (pairVal == cards.get(i - 1).getValue())) {
                             return List.of(6, threeVal, pairVal);
                         }
                     }                    
@@ -137,73 +143,99 @@ public class Hand implements Comparable<Hand> {
     }
     
     public List<Integer> isFlush(List<Card> cards) {
-        for(Suit suit : Suit.values()) { // get all cards of each suit
+        for (Suit suit : Suit.values()) { // get all cards of each suit
             List<Card> suitCards = cards.stream().filter(card -> card.getSuit() == suit).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
             if (suitCards.size() < 5) {
                 continue;
             }
             List<Integer> highestValues = suitCards.subList(0, 5).stream().map(Card::getValue).collect(Collectors.toList());
-
             List<Integer> hand = new ArrayList<>(List.of(5));
             hand.addAll(highestValues);
-            
             return hand;
-            }
+        }
         return null;
     }
     
-    public boolean isStraight(List<Card> cards) {
+    public List<Integer> isStraight(List<Card> cards) {
         for (int i = 0; i < 3; i++) { // for the first 3 cards, check the 4 next for a straight
+            Boolean checkForStraight = true;
             int prevVal = cards.get(i).getValue(); // get val of first card
-            for (int j = i + 1; j < i + 3; j++) { // for next 3 cards, check if they are one higher than the last
+            for (int j = i + 1; j < i + 4; j++) { // for next 3 cards, check if they are one higher than the last
                 if (cards.get(j).getValue() == prevVal + 1) {
                     prevVal++;
                 } else {
+                    checkForStraight = false;
                     break;
                 }
             }
-            if (cards.get(i + 4).getValue() == prevVal + 1) { // check the last card
-                return true;
+            if (checkForStraight && (cards.get(i + 4).getValue() == prevVal + 1)) { // check the last card
+                return List.of(4, cards.get(i + 4).getValue());
             }
         }
-        return false;
+        return null;
     }
-    
-    public boolean isThreeOfAKind(List<Card> cards) {
+    public List<Integer> isThreeOfAKind(List<Card> cards) {
         int count;
         for (int val = 2 ; val < 15; val++) {
             count = 0;
             for (Card card : cards) {
-                if (card.getValue() == val) { count++; }
-                if (count == 3) { return true; }
+                if (card.getValue() == val) count++;
+            }
+            if (count == 3) {
+                final Integer valFin = val;
+                List<Integer> hand = new ArrayList<>();
+                hand.add(3);
+                hand.add(val);
+                List<Integer> highestCards = cards.stream().filter(card -> card.getValue() != valFin).sorted(Comparator.reverseOrder()).map(card -> card.getValue()).collect(Collectors.toList());
+                hand.addAll(highestCards.subList(0, 2));
+                return hand;
             }
         }
-        return false;
-    }
-
-    public boolean isTwoPair(List<Card> cards) {
-        for (int i = 0; i < 6; i++) {
-            if (cards.get(i).getValue() == cards.get(i + 1).getValue()) {
-                for (int j = i + 1; j < 6; j++) {
-                    if (cards.get(j).getValue() == cards.get(j + 1).getValue()) {
-                        return true;
-                    }
-                }
-                return true;
-            }
-        }
-        return false;
+        return null;
     }
     
-    public boolean isOnePair(List<Card> cards) {
-        for (int i = 0; i < 6; i++) { // Check the 7 cards that a player can make combinations with.
-            if (cards.get(i).getValue() == cards.get(i + 1).getValue()) { // Check if card has same val as next card (pair)
-                return true;
+    public List<Integer> isTwoPair(List<Card> cards) {
+        for (int i = 0; i < 6; i++) { // look for fist pair
+            if (cards.get(i).getValue() == cards.get(i + 1).getValue()) {
+                for (int j = i + 1; j < 6; j++) { // look for second pair
+                    if (cards.get(j).getValue() == cards.get(j + 1).getValue()) {
+                        final Integer valH1 = cards.get(j).getValue();
+                        final Integer valH2 = cards.get(i).getValue();
+                        List<Integer> hand = new ArrayList<>();
+                        hand.add(2);
+                        hand.add(valH1);
+                        hand.add(valH2);
+                        List<Integer> highestCards = cards.stream().filter(card -> (card.getValue() != valH1) && (card.getValue() != valH2)).sorted(Comparator.reverseOrder()).map(card -> card.getValue()).collect(Collectors.toCollection(ArrayList::new));
+                        hand.add(highestCards.get(0));
+                        return hand;                    
+                    }
+                }
             }
         }
-        return false;
+        return null;
     }
-
+    public List<Integer> isOnePair(List<Card> cards) {
+        for (int i = 0; i < 6; i++) { // Check the 7 cards that a player can make combinations with.
+            if (cards.get(i).getValue() == cards.get(i + 1).getValue()) { // Check if card has same val as next card (pair)
+                final Integer valPair = cards.get(i).getValue();
+                List<Integer> hand = new ArrayList<>();
+                hand.add(1);
+                hand.add(valPair);
+                List<Integer> highestCards = cards.stream().filter(card -> card.getValue() != valPair).sorted(Comparator.reverseOrder()).map(card -> card.getValue()).collect(Collectors.toList());
+                hand.addAll(highestCards.subList(0, 3)); // add 3 highest cards excluding the pair
+                return hand;  
+            }
+        }
+        return null;
+    }
+    public List<Integer> isHighCard(List<Card> cards) {
+        List<Integer> hand = new ArrayList<>();
+        hand.add(0);
+        List<Integer> fiveHigh = cards.stream().sorted(Comparator.reverseOrder()).map(card -> card.getValue()).collect(Collectors.toList());
+        hand.addAll(fiveHigh.subList(0, 5));
+        return hand;
+    }
+    
     public List<Integer> getHand() {
         return hand;
     }
@@ -220,5 +252,8 @@ public class Hand implements Comparable<Hand> {
         }
         return 0;
     }
-    
+
+    // public Integer getHighestCard(List<Card> card) {
+
+    // }
 }

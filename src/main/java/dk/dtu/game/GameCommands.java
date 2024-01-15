@@ -58,7 +58,7 @@ public class GameCommands{
                         gameClient.initNextPhase();
                     }
                 }
-                printToScreen(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+                printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 break;
             case Raise:
@@ -67,7 +67,7 @@ public class GameCommands{
                 if(getOwnId().equals(getDealerId())){
                     gameClient.sendPlayerTurnCommand(action.getSenderId());
                 }
-                printToScreen(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+                printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() + (action.getAmount()!=0 ?" " +action.getAmount():"" ));
             break;
 
@@ -81,7 +81,7 @@ public class GameCommands{
                         gameClient.initNextPhase();
                     }
                 }
-                printToScreen(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+                printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 break;
             case Call:
@@ -96,7 +96,7 @@ public class GameCommands{
                             gameClient.initNextPhase();
                     }
                 }
-                printToScreen(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+                printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 break;
             default:
@@ -301,7 +301,7 @@ public class GameCommands{
     }
 
 
-    public void printToScreen(String GamePhase){
+    public void printToScreen(){
         clearScreen();
         System.out.println(gameClient.getCurrentRoundState().getGamePhaseType().toString());
         System.out.println("Smallblind: " + gameClient.getCurrentRoundState().getSmallBlind() + " | Bigblind: "  +gameClient.getCurrentRoundState().getBigBlind());
