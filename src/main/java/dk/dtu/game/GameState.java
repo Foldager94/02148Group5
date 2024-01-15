@@ -14,6 +14,7 @@ public class GameState {
     Deck deck = new Deck();
     List<RoundState> history;
     RoundState currentRoundState;
+
     
     public void createNewRoundState(String peerId) {
         updateRound();
@@ -74,6 +75,7 @@ public class GameState {
         }
         return players.get(0).id;
     }
+
 
     public int findPlayerIndexById(String targetId) {
         for (int i = 0; i < players.size(); i++) {

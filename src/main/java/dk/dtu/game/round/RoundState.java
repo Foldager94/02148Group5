@@ -24,6 +24,7 @@ public class RoundState {
     private String lastRaise = null;
     private String firstPlayer = null;
     private GamePhaseType gamePhaseType = null;
+    boolean isMyTurn = false;
 
     public RoundState(int roundId, String peerId, List<Player> players, String smallBlind, String bigBlind, String dealer, String firstPlayer){
         this.roundId = roundId;
@@ -153,7 +154,7 @@ public class RoundState {
         bets.set(Integer.parseInt(BB.id),bigBlindPrice);
         pot = smallBlindPrice + bigBlindPrice;
         SB.removeFromBalance(smallBlindPrice);
-        BB.removeFromBalance(bigBlindPrice);       
+        BB.removeFromBalance(bigBlindPrice);
     }
 
     public void setNewFirstPlayer(String previousFirstId){ // called if the previos first player folds
@@ -194,6 +195,13 @@ public class RoundState {
         pot += amount+amountNeededToCall;
         System.out.println(pot);
         
+    }
+
+    public boolean getIsMyTurn(){
+        return isMyTurn;
+    }
+    public void setIsMyTurn(boolean val){
+        isMyTurn = val;
     }
 
     public boolean hasPlayerFolded(String peerId){
