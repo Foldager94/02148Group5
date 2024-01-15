@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import dk.dtu.game.Card;
+import dk.dtu.game.Hand;
 import dk.dtu.game.commands.enums.GamePhaseType;
 import static dk.dtu.game.GameSettings.*;
 
@@ -25,6 +26,11 @@ public class RoundState {
     private String firstPlayer = null;
     private GamePhaseType gamePhaseType = null;
     boolean isMyTurn = false;
+    private Hand winningHand = null;
+    private List<String> winningIds = new ArrayList<>();
+    private int handComparingCount = 0;
+
+    
 
     public RoundState(int roundId, String peerId, List<Player> players, String smallBlind, String bigBlind, String dealer, String firstPlayer){
         this.roundId = roundId;
@@ -35,13 +41,43 @@ public class RoundState {
         this.dealer = dealer;    
         this.bets = new ArrayList<>();    
         this.pot = 0;
-        System.out.println("First player is initially " + firstPlayer);
         this.firstPlayer = firstPlayer;
         communityCards = new ArrayList<>();
         for (int i = 0; i < players.size(); i++) {
             bets.add(0);
         }
     }
+
+    public void incrementHandComparingCount(){
+        handComparingCount++;
+    }
+
+    public int getHandComparingCount(){
+        return handComparingCount;
+    }
+
+    public Hand getWinningHand(){
+        return winningHand;
+    }
+
+    public void setWinningHand(Hand hand){
+        this.winningHand = hand;
+    }
+
+    public void setWinningId(String id) {
+        winningIds = new ArrayList<String>();
+        winningIds.add(id);
+    }
+
+    public void addWinningId(String id) {
+        winningIds.add(id);
+    }
+
+    public List<String> getWinningId() {
+        return winningIds;
+    }
+
+
 
     
     public List<Player> getPlayers(){
@@ -67,6 +103,7 @@ public class RoundState {
        int bet2bAdded = addBet(bet);
        bets.add(bet2bAdded);
        return bets;
+       
     }
 
     public String getFirstPlayerId(){

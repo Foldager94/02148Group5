@@ -4,15 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
-
 import org.jspace.FormalField;
 import org.jspace.SequentialSpace;
 import org.jspace.Space;
 import java.io.BufferedReader;
-
 import dk.dtu.network.MasterPeer;
 import dk.dtu.network.Peer;
-
 import dk.dtu.game.Hand;
 import dk.dtu.game.Card;
 import dk.dtu.game.Suit;
@@ -26,7 +23,6 @@ import dk.dtu.ui.LobbyScreen;
 import dk.dtu.ui.StartScreen;
 import javafx.application.Application;
 
-
 public class App {
     
     // public static void main(String[] args) {
@@ -34,11 +30,12 @@ public class App {
     // }   
         public static void main( String[] args ) throws IOException
     {
-        // testSpecificHand();
-        for (int i = 0; i < 10; i++) {
-            testRandomHand();
-            System.out.println();
-        }
+        // // testSpecificHand();
+        // for (int i = 0; i < 10; i++) {
+        //     testRandomHand();
+        //     System.out.println();
+        // }
+
 
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Input your name:");
@@ -97,7 +94,7 @@ public class App {
         List<Card> cards = deck.draw(7);
         // Hand hand = new Hand()
         System.out.println(cards.toString());
-        List<Integer> hand = new Hand(cards).getHand();
+        List<Integer> hand = new Hand(cards, "").getHand();
         System.out.println(hand.toString());
     }
 
@@ -111,7 +108,7 @@ public class App {
         cardList.add(new Card(5, Suit.Clubs));
         cardList.add(new Card(2, Suit.Clubs));
         System.out.println(cardList.toString());
-        List<Integer> hand = new Hand(cardList).getHand();
+        List<Integer> hand = new Hand(cardList, "").getHand();
         System.out.println(hand.toString());
     }
 }

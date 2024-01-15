@@ -4,7 +4,6 @@ import org.jspace.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-
 public class MasterPeer extends Peer {
     public final int MAX_LOBBY_SIZE = 8;
 	SequentialSpace MPrequests;

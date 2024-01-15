@@ -13,6 +13,7 @@ public class ConnectionStatus extends Command {
     public ConnectionStatusType getConnectionStatus(){
         return connectionStatus;
     }
+    
     public static ConnectionStatus fromJson(String json) {
         return Command.fromJson(json, ConnectionStatus.class);
     }

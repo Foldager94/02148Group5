@@ -160,7 +160,6 @@ public class Peer {
                         new FormalField(String.class), // name
                         new FormalField(String.class) // uri
                     ));
-                    System.out.println("Received introduction");
                     String peerId = data.getElementAt(String.class, 1);
                     String peerName = data.getElementAt(String.class, 2);
                     String peerUri = data.getElementAt(String.class, 3);
@@ -168,7 +167,7 @@ public class Peer {
                     showRecievedIntroduction(peerId, peerName, peerUri);
                 }
             } catch (Exception e) {System.out.println(e.getMessage());}
-        }).start();
+        }).start(); 
     }
 
     public void addPeer(String peerId, String peerName, String peerUri) {

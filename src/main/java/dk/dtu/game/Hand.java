@@ -8,17 +8,23 @@ import java.util.stream.Collectors;
 
 import javax.naming.InitialContext;
 
+import com.google.gson.Gson;
+
 public class Hand implements Comparable<Hand> {
     private List<Card> cards;
     private List<Integer> hand;
+    private String id;
 
-    public Hand(List<Card> allCards) {
+    public Hand(List<Card> allCards, String id) {
+        this.id = id;
         Collections.sort(allCards);
         hand = determineHand(allCards);
     }
 
-    public Hand(List<Card> communityCards, List<Card> holeCards)  {
-        cards = List.copyOf(communityCards);
+    public Hand(List<Card> communityCards, List<Card> holeCards, String id)  {
+        this.id = id;
+        cards = new ArrayList<>();
+        cards.addAll(communityCards);
         cards.addAll(holeCards);
         Collections.sort(cards);
         hand = determineHand(cards);
@@ -62,12 +68,9 @@ public class Hand implements Comparable<Hand> {
         if (handAttempt != null) {
             return handAttempt;
         }
-        handAttempt = isHighCard(cards);
-        if (handAttempt != null) {
-            return handAttempt;
-        }
-        return null;
+        return isHighCard(cards);
     }
+
 
     public List<Integer> isRoyalFlush(List<Card> cards) {
         for (Suit suit : Suit.values()) {
@@ -236,6 +239,10 @@ public class Hand implements Comparable<Hand> {
         return hand;
     }
     
+    public String getId() {
+        return id;
+    }
+
     public List<Integer> getHand() {
         return hand;
     }
@@ -253,7 +260,13 @@ public class Hand implements Comparable<Hand> {
         return 0;
     }
 
-    // public Integer getHighestCard(List<Card> card) {
+    public String toJson() {
+        Gson gson = new Gson();
+        return gson.toJson(this);
+    }
 
-    // }
+    public static Hand fromJson(String json) {
+        Gson gson = new Gson();
+        return gson.fromJson(json, Hand.class);
+    }
 }
