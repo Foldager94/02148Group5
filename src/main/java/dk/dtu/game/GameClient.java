@@ -244,7 +244,7 @@ public class GameClient {
     public void initShowdown(){
         List<String> PeerIds = peer.getPeerIds();
         for(String id : PeerIds) {
-            GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.River, new ArrayList<Card>());
+            GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.Showdown, new ArrayList<Card>());
             sendCommand(id, "GamePhase", gpCommand.toJson());
         }
     }
@@ -364,7 +364,6 @@ public class GameClient {
     public boolean isLastPlayer(String previusePeerId) {
         String nextPlayerId = getCurrentRoundState().getNextNonFoldedPlayer(previusePeerId);
         String lastPlayer;
-        //String lastRaiseId = gameClient.getCurrentRoundState().getLastRaise();
         if (getCurrentRoundState().getLastRaise() != null) {
             lastPlayer = getCurrentRoundState().getLastRaise();
         } else {

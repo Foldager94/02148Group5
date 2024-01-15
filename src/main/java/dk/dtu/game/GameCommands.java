@@ -157,39 +157,31 @@ public class GameCommands{
                 gameClient.getCurrentRoundState().setLastRaise(null);
                 calcBlindBets();
                 printToScreen("PreFlop");
-                if(isFirstPlayer(getOwnId())) {
-                    System.out.println("Make a bet");
-                }
                 break;
             case Flop:
                 setGamePhaseType(GamePhaseType.Flop);
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
                 printToScreen("Flop");
-                if(isFirstPlayer(getOwnId())) {
-                    System.out.println("Make a bet");
-                }
                 break;
             case Turn:
                 setGamePhaseType(GamePhaseType.Turn);
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
                 printToScreen("Turn");
-                if(isFirstPlayer(getOwnId())) {
-                    System.out.println("Make a bet");
-                }
                 break;
             case River:
                 setGamePhaseType(GamePhaseType.River);
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
                 printToScreen("River");
-                if(isFirstPlayer(getOwnId())) {
-                    System.out.println("Make a bet");
-                }
+                System.out.println("This is River");
+
                 break;
             case Showdown:
                 setGamePhaseType(GamePhaseType.Showdown);
+                printToScreen("Showdown");
+                System.out.println("We are in showdown");
                 // Calculate best hand
                 // Send Best Hand To Dealer
             default:
@@ -310,7 +302,7 @@ public class GameCommands{
 
     public void printToScreen(String GamePhase){
         clearScreen();
-        System.out.println(GamePhase);
+        System.out.println(gameClient.getCurrentRoundState().getGamePhaseType().toString());
         System.out.println("Smallblind: " + gameClient.getCurrentRoundState().getSmallBlind() + " | Bigblind: "  +gameClient.getCurrentRoundState().getBigBlind());
         System.out.println("Bets: " + gameClient.getCurrentRoundState().getBets());
         System.out.println("Pot: " + gameClient.getCurrentRoundState().getPot());
