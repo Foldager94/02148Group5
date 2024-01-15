@@ -58,7 +58,7 @@ public class GameCommands{
                         gameClient.initNextPhase();
                     }
                 }
-                printToScreen(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+                printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 break;
             case Raise:
@@ -67,7 +67,7 @@ public class GameCommands{
                 if(getOwnId().equals(getDealerId())){
                     gameClient.sendPlayerTurnCommand(action.getSenderId());
                 }
-                printToScreen(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+                printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() + (action.getAmount()!=0 ?" " +action.getAmount():"" ));
             break;
 
@@ -81,7 +81,7 @@ public class GameCommands{
                         gameClient.initNextPhase();
                     }
                 }
-                printToScreen(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+                printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 break;
             case Call:
@@ -95,7 +95,7 @@ public class GameCommands{
                             gameClient.initNextPhase();
                     }
                 }
-                printToScreen(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+                printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 break;
             default:
@@ -156,7 +156,7 @@ public class GameCommands{
                 setHoleCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
                 calcBlindBets();
-                printToScreen("PreFlop");
+                printToScreen();
                 if(isFirstPlayer(getOwnId())) {
                     System.out.println("Make a bet");
                 }
@@ -165,7 +165,7 @@ public class GameCommands{
                 setGamePhaseType(GamePhaseType.Flop);
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
-                printToScreen("Flop");
+                printToScreen();
                 if(isFirstPlayer(getOwnId())) {
                     System.out.println("Make a bet");
                 }
@@ -174,7 +174,7 @@ public class GameCommands{
                 setGamePhaseType(GamePhaseType.Turn);
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
-                printToScreen("Turn");
+                printToScreen();
                 if(isFirstPlayer(getOwnId())) {
                     System.out.println("Make a bet");
                 }
@@ -183,7 +183,7 @@ public class GameCommands{
                 setGamePhaseType(GamePhaseType.River);
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
-                printToScreen("River");
+                printToScreen();
                 if(isFirstPlayer(getOwnId())) {
                     System.out.println("Make a bet");
                 }
@@ -308,9 +308,9 @@ public class GameCommands{
     }
 
 
-    public void printToScreen(String GamePhase){
+    public void printToScreen(){
         clearScreen();
-        System.out.println(GamePhase);
+        System.out.println(gameClient.getCurrentRoundState().getGamePhaseType().toString());
         System.out.println("Smallblind: " + gameClient.getCurrentRoundState().getSmallBlind() + " | Bigblind: "  +gameClient.getCurrentRoundState().getBigBlind());
         System.out.println("Bets: " + gameClient.getCurrentRoundState().getBets());
         System.out.println("Pot: " + gameClient.getCurrentRoundState().getPot());

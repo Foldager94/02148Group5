@@ -28,6 +28,7 @@ public class GameClient {
     public Peer peer;
     public GameState gameState;
     public final GameCommands gameCommands = new GameCommands(this);
+    
     public GameClient(Peer peer) {
         gameSpace = new QueueSpace();
         gameSpaces = new SpaceRepository();
@@ -340,7 +341,6 @@ public class GameClient {
         printToScreen(getCurrentRoundState().getGamePhaseType().toString());
 
     }
-
 
     public void printToScreen(String GamePhase){
         clearScreen();
