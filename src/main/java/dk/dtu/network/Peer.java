@@ -25,7 +25,7 @@ public class Peer {
     public SequentialSpace peers; // (id, name, uri, isMuted)
     //public SpaceRepository chats;  // contains all chats to the other peers
 
-    public String MPIP = "localhost";
+    public String MPIP = "10.209.157.221";
     public String MPPort = "9004";
     public int MPID;
     public String ip;
@@ -50,7 +50,7 @@ public class Peer {
             // Dotenv dotenv = null;
             // dotenv = Dotenv.configure().load();
             // System.out.println(dotenv.get("MPIP"));
-            ip = MPIP;
+            ip = "localhost";
             uri = formatURI(ip, port);
             // ip = Inet4Address.getLocalHost().getHostAddress().toString();
             // port = "9002";
@@ -72,7 +72,6 @@ public class Peer {
                 System.out.println("The lobby is full. Connections to Master Peer will be closed");
                 requests.close();
                 System.exit(1);
-                
             }
             ready = new RemoteSpace(formatURI(MPIP, MPPort) + "/ready?keep");
 
@@ -103,6 +102,7 @@ public class Peer {
             String peerName = (String)peer.get(1);
             String peerUri  = (String)peer.get(2);
             Boolean isMuted = false;
+            addPear(peerId, peerName, peerUri);
             peers.put(peerId, peerName, peerUri, isMuted);
             showTryingtoConnectToPear(peerId, peerName, peerUri);
             chat.addChatToRepo(peerId,peerUri);
@@ -111,6 +111,7 @@ public class Peer {
 
     public void initSpaces() {
         try {
+            System.out.println(formatURI(ip, port));
             //chat = new SequentialSpace();
             remoteResp = new SpaceRepository();
             remoteResp.add("chat", chat.getChat());
@@ -158,13 +159,19 @@ public class Peer {
                     String peerId = data.getElementAt(String.class, 1);
                     String peerName = data.getElementAt(String.class, 2);
                     String peerUri = data.getElementAt(String.class, 3);
+                    addPear(peerId, peerName, peerUri);
                     showRecievedIntroduction(peerId, peerName, peerUri);
-                    peers.put(peerId, peerName, peerUri, false);
-                    chat.addChatToRepo(peerId, peerUri);
-                    chat.getPeerChat(peerId).put("response");
                 }
             } catch (Exception e) {System.out.println(e.getMessage());}
         }).start();
+    }
+
+    public void addPear(String peerId, String peerName, String peerUri) {
+        try {
+            peers.put(peerId, peerName, peerUri, false);
+            chat.addChatToRepo(peerId, peerUri);
+            chat.getPeerChat(peerId).put("response");
+        } catch (Exception e) {}
     }
 
     public void showRecievedIntroduction(String peerId, String peerName, String peerUri) {
