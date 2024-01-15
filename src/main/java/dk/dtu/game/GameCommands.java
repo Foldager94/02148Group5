@@ -157,31 +157,31 @@ public class GameCommands{
                 setHoleCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
                 calcBlindBets();
-                printToScreen("PreFlop");
+                printToScreen();
                 break;
             case Flop:
                 setGamePhaseType(GamePhaseType.Flop);
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
-                printToScreen("Flop");
+                printToScreen();
                 break;
             case Turn:
                 setGamePhaseType(GamePhaseType.Turn);
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
-                printToScreen("Turn");
+                printToScreen();
                 break;
             case River:
                 setGamePhaseType(GamePhaseType.River);
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
-                printToScreen("River");
-                System.out.println("This is River");
+                printToScreen();
+                System.out.println();
 
                 break;
             case Showdown:
                 setGamePhaseType(GamePhaseType.Showdown);
-                printToScreen("Showdown");
+                printToScreen();
                 System.out.println("We are in showdown");
                 // Calculate best hand
                 // Send Best Hand To Dealer
