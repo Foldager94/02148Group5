@@ -86,7 +86,8 @@ public class GameCommands{
                 break;
             case Call:
                 gameClient.getCurrentRoundState().calcPlayerCall(action.getSenderId());
-                if(getOwnId().equals(getDealerId())){
+
+                if(getOwnId().equals(getDealerId())){ // Check if own player is dealer
                     if(!isLastPlayer(action.getSenderId())){  // if the sender was not the last player
                             gameClient.sendPlayerTurnCommand(action.getSenderId());
                     } else if(isLastPlayer(action.getSenderId())){ // else if the sender was the last player

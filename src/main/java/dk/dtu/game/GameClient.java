@@ -287,18 +287,6 @@ public class GameClient {
         return true;
     }
 
-    
-    // public void addPotToPlayerBalance() {
-    //     for (Player player : gameClient.gameState.currentRoundState.getPlayers()) {
-    //      if(isOnlyPlayer()) {
-    //         player.balance+=
-    //      }
-
-
-    //     }
-    // }
-
-
 
     public void makeRaiseAction(String amount){
         RoundState currentRoundState = getCurrentRoundState();
@@ -356,13 +344,13 @@ public class GameClient {
             if(isLastPlayer(peer.id)){
                 initNextPhase();
             }else{
-            sendPlayerTurnCommand(peer.id);
+                sendPlayerTurnCommand(peer.id);
             }
         }
 
     }
-    public boolean isLastPlayer(String previusePeerId) {
-        String nextPlayerId = getCurrentRoundState().getNextNonFoldedPlayer(previusePeerId);
+    public boolean isLastPlayer(String previousPeerId) {
+        String nextPlayerId = getCurrentRoundState().getNextNonFoldedPlayer(previousPeerId);
         String lastPlayer;
         if (getCurrentRoundState().getLastRaise() != null) {
             lastPlayer = getCurrentRoundState().getLastRaise();
