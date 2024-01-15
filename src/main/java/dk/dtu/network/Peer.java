@@ -24,19 +24,17 @@ public class Peer {
     public SpaceRepository remoteResp; // the peers remote repository(s)
     public SequentialSpace peers; // (id, name, uri, isMuted)
     //public SpaceRepository chats;  // contains all chats to the other peers
-
-    public String MPIP = "10.209.157.221";
+    public String MPIP = "localhost";
     public String MPPort = "9004";
     public int MPID;
     public String ip;
     public String port;
     public String uri;
     public String id;
-    
     public RemoteSpace requests;
     public RemoteSpace ready;
 
-
+    
     public Peer(String name, String port) {
         this.name = name;
         this.port = port;
@@ -60,6 +58,7 @@ public class Peer {
     public void connectToMP() {
         try {
             requests = new RemoteSpace(formatURI(MPIP, MPPort) + "/requests?keep");
+            
             requests.put("Helo", name, formatURI(ip, port));
 
             Tuple mpResponse = new Tuple(requests.get(
@@ -102,10 +101,10 @@ public class Peer {
             String peerName = (String)peer.get(1);
             String peerUri  = (String)peer.get(2);
             Boolean isMuted = false;
-            addPear(peerId, peerName, peerUri);
-            peers.put(peerId, peerName, peerUri, isMuted);
+            addPeer(peerId, peerName, peerUri);
+            // peers.put(peerId, peerName, peerUri, isMuted);
             showTryingtoConnectToPear(peerId, peerName, peerUri);
-            chat.addChatToRepo(peerId,peerUri);
+            // chat.addChatToRepo(peerId,peerUri);
         }
     }
 
@@ -159,14 +158,14 @@ public class Peer {
                     String peerId = data.getElementAt(String.class, 1);
                     String peerName = data.getElementAt(String.class, 2);
                     String peerUri = data.getElementAt(String.class, 3);
-                    addPear(peerId, peerName, peerUri);
+                    addPeer(peerId, peerName, peerUri);
                     showRecievedIntroduction(peerId, peerName, peerUri);
                 }
             } catch (Exception e) {System.out.println(e.getMessage());}
         }).start();
     }
 
-    public void addPear(String peerId, String peerName, String peerUri) {
+    public void addPeer(String peerId, String peerName, String peerUri) {
         try {
             peers.put(peerId, peerName, peerUri, false);
             chat.addChatToRepo(peerId, peerUri);

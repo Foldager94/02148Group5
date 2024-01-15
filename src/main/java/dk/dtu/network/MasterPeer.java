@@ -7,13 +7,11 @@ import java.util.LinkedList;
 
 public class MasterPeer extends Peer {
     public final int MAX_LOBBY_SIZE = 8;
-
 	SequentialSpace MPrequests;
     SequentialSpace MPreadyFlags;
     SequentialSpace locks;
     
     public int idTracker = 0;
-
     public MasterPeer(String name) {
 		super(name, "9004");
         this.id = generateNewPeerId();
@@ -37,10 +35,10 @@ public class MasterPeer extends Peer {
     }
 
     @Override
-    public void addPear(String peerId, String peerName, String peerUri) {
+    public void addPeer(String peerId, String peerName, String peerUri) {
         try {
-            super.addPear(peerId, peerName, peerUri);
-            if (locks.getp(new ActualField("missing " + peerId)) == null) {
+            super.addPeer(peerId, peerName, peerUri);
+            if (locks.getp(new ActualField("missing " + peerId)) != null) {
                 locks.put("loginLock");
             }
         } catch (Exception e) {}
@@ -54,11 +52,10 @@ public class MasterPeer extends Peer {
             while (true) {
                 try {
                     // await join request from requests space. Object[] = {"Helo", Name, IP:PORT}
-                    String peerId = generateNewPeerId();
                     locks.get(new ActualField("loginLock"));
+                    String peerId = generateNewPeerId();
                     locks.put("missing " + peerId);
                     Object[] info = MPrequests.get(new ActualField("Helo"), new FormalField(String.class), new FormalField(String.class));
-
                     // Peer class should take care of this?
                     // Add peer to MB's Peers space. {Id, Name, Ip:port}
                     //peers.put(peerId,info[1],info[2]);
