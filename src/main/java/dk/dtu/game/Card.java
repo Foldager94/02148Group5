@@ -1,4 +1,4 @@
-package dk.dtu.PokerGame;
+package dk.dtu.game;
 
 public class Card implements Comparable<Card> {
     private int value;
@@ -21,7 +21,6 @@ public class Card implements Comparable<Card> {
     public void setSuit(Suit suit){
         this.suit = suit;
         }
-    
         
      public String toString(){
         String valueStr;

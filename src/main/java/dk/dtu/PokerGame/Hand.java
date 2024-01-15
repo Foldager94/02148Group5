@@ -1,15 +1,13 @@
-//package dk.dtu.PokerGame;
+package dk.dtu.PokerGame;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.ArrayList;
+
+public class Hand {
 //
-//import java.util.Collections;
-//import java.util.List;
-//import java.util.ArrayList;
 //
-//public class Deck {
-//
-//    private static List<Card> cards; // can be seen as a "stack" of cards
-//    private static int usedCards = 0; // keep track of how many of the cards have been used
-//
-//    public Deck() {
+//    public Hand(List<Card> holeCards, List<Card> communityCards) {
 //        cards = new ArrayList<Card>();
 //        for (Suit suit : Suit.values()) {
 //            for (int val = 2; val < 15; val++) {
@@ -34,4 +32,4 @@
 //        return 52 - usedCards;
 //    }
 //
-//}
+}

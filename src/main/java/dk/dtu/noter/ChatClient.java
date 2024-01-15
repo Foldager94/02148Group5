@@ -1,4 +1,4 @@
-package dk.dtu.client;
+package dk.dtu.noter;
 
 import org.jspace.ActualField;
 import org.jspace.FormalField;
@@ -17,7 +17,7 @@ public class ChatClient {
             while (true) {
                 try {
                     Object[] messageTuple = chatSpace.get(new ActualField("chat"), new FormalField(String.class), new FormalField(String.class));
-                    String sender = (String) messageTuple[1];
+                    String sender   = (String) messageTuple[1];
                     String message = (String) messageTuple[1];
                     onMessageReceived(sender, message);
                 } catch (InterruptedException e) {
