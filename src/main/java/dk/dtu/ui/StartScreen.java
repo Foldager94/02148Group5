@@ -30,7 +30,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class StartScreen extends Application {
-    private ScreenSize screenSize = new ScreenSize(1200, 700);
+    private ScreenSize screenSize = new ScreenSize(1200, 680);
 
 	private Stage primaryStage;
     private Scene scene;
@@ -52,7 +52,6 @@ public class StartScreen extends Application {
         errorText.getStyleClass().add("error");
 
         startController = new StartController(screenSize, errorText);
-
 
         Button joinButton = new Button("Join lobby");
         Button createButton = new Button("Create lobby");

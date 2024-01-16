@@ -60,8 +60,16 @@ public class LobbyScreen {
 		return peer;
 	}
 
+	public ScreenSize getScreenSize() {
+		return screenSize;
+	}
+
 	public ChatController getChat(Peer peer) {
 		return (ChatController)(peer.chat);
+	}
+
+	public Pane getRoot() {
+		return root;
 	}
 
 

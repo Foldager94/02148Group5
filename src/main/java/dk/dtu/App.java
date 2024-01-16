@@ -19,10 +19,10 @@ import javafx.application.Application;
 
 public class App {
     
-    // public static void main(String[] args) {
-    //     Application.launch(StartScreen.class, args);
-    // }   
-        public static void main( String[] args ) throws IOException
+    public static void main(String[] args) {
+        Application.launch(StartScreen.class, args);
+    }   
+        public static void main2( String[] args ) throws IOException
     {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Input your name:");

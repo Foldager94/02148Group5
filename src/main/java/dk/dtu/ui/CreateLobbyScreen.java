@@ -7,7 +7,9 @@ import dk.dtu.ui.controllers.ChatController;
 import dk.dtu.ui.controllers.MasterPeerController;
 import dk.dtu.ui.controllers.PeerController;
 import dk.dtu.ui.util.ScreenSize;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Button;
 
 public class CreateLobbyScreen extends LobbyScreen {
     public CreateLobbyScreen(ScreenSize screenSize, MasterPeer peer, PlayersListView list) {
@@ -17,6 +19,12 @@ public class CreateLobbyScreen extends LobbyScreen {
     @Override
     public void initGraphics(Boolean host) {
         super.initGraphics(true);
+        Button startButton = new Button("Start game");
+        startButton.setLayoutY(150);
+        
+        startButton.getStyleClass().add("main-button");
+        getRoot().getChildren().add(startButton);
+        startButton.setLayoutX(150 + 784);
     }
 
     @Override
