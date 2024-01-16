@@ -58,13 +58,14 @@ public class MasterPeer extends Peer {
                     Object[] info = MPrequests.get(new ActualField("Helo"), new FormalField(String.class), new FormalField(String.class));
                     // Peer class should take care of this?
                     // Add peer to MB's Peers space. {Id, Name, Ip:port}
-                    //peers.put(peerId,info[1],info[2]);
+                    // peers.put(peerId,info[1],info[2]);
 
                     // Retrieve current peers connected
                     LinkedList<Object[]> peers = this.peers.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class), new FormalField(Boolean.class));
                     if (isLobbyFull()) {
                         MPrequests.put("Lobby is full", info[2]);
                         System.out.println("Lobby is full");
+                        locks.put("loginLock");
                         continue;
                     }
                     MPrequests.put("Approved", info[2]);
