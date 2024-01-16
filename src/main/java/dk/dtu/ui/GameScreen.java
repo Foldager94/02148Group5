@@ -4,6 +4,8 @@ import java.awt.Point;
 import java.awt.TextField;
 import java.io.File;
 
+import dk.dtu.game.GameClient;
+import dk.dtu.game.round.RoundState;
 import dk.dtu.ui.util.ScreenSize;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -24,25 +26,18 @@ public class GameScreen {
 
 	private static Pane root = new Pane();
 
-	public GameScreen(ScreenSize screenSize) {
+	public GameScreen(ScreenSize screenSize, GameClient gameClient) {
 		this.screenSize = screenSize;
-		initGraphics();
+		makeGraphics(gameClient.getCurrentRoundState(), root);
 	}
 
-	public void initGraphics() {
+	public void makeGraphics(RoundState roundState, Pane root) {
         Label header = new Label("Game screen");
 		header.setLayoutY(50);
 
 
 		header.getStyleClass().add("header");
 
-		ObservableList<String> names = FXCollections.observableArrayList("Alice", "Bob", "Chalie");
-		ListView<String> listView = new ListView<String>(names);
-		listView.setLayoutX(100);
-		listView.setLayoutY(150);
-		listView.setMaxHeight(240); // 24 px pr row
-
-		root.getChildren().add(listView);
 		root.getChildren().add(header);
 		root.getStyleClass().add("pane");
 		
