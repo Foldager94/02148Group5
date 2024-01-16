@@ -1,4 +1,4 @@
-package dk.dtu.PokerGame;
+package dk.dtu.game;
 
 // card images from https://opengameart.org/content/playing-cards-vector-png
 

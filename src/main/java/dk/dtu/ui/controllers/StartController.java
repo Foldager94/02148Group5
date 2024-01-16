@@ -13,7 +13,6 @@ import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
-
 public class StartController {
     ScreenSize screenSize;
     Label errorText;
@@ -44,7 +43,7 @@ public class StartController {
             p.connectToMP();
             p.sendIntroduction();
             p.getIntroduction();
-            p.startMessageReciever();
+            p.startMessageReceiver();
             LobbyScreen lobbyScreen = new LobbyScreen(screenSize, p, list);
             Scene lobbyScene = new Scene(lobbyScreen.getView(), screenSize.getWidth(), screenSize.getHeight());
             addCss("src\\resources\\main.css", lobbyScene);
@@ -63,7 +62,7 @@ public class StartController {
             mp.awaitLobbyRequest();
             mp.awaitReadyFlags();
             mp.getIntroduction();
-            mp.startMessageReciever();
+            mp.startMessageReceiver();
             CreateLobbyScreen lobbySreen = new CreateLobbyScreen(screenSize, mp, list);
             Scene lobbyScene = new Scene(lobbySreen.getView(), screenSize.getWidth(), screenSize.getHeight());
             addCss("src\\resources\\main.css", lobbyScene);

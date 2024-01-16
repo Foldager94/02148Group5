@@ -24,7 +24,7 @@ public class ChatClient {
         this.peer = peer;
     }
 
-    public void startMessageReciever() {
+    public void startMessageReceiver() {
         new Thread(() -> {
             while (true) {
                 try {
@@ -34,6 +34,8 @@ public class ChatClient {
                         new FormalField(Boolean.class) // isAllChat
                     ));
                     String senderId = messageTuple.getElementAt(String.class, 0); // its id
+
+
 
                    if(!peer.isPeerKnown(senderId)){
                        sendMessage("IntroduceYourSelf", senderId, false);
@@ -46,6 +48,12 @@ public class ChatClient {
                     }
                     
                     String message = messageTuple.getElementAt(String.class, 1);
+
+                    if(message.equals("StartGame")){
+                        System.out.println("\033[31mSystem: Game is starting.\033[0m");
+                        peer.game.initGame();
+                        continue;
+                    }
 
                     if(message.equals("IntroduceYourSelf")){
                         peer.sendIntroductionMsg(senderId);
@@ -78,7 +86,7 @@ public class ChatClient {
         }
     }
 
-//    public void startMessageReciever() {
+//    public void startMessageReceiver() {
 //        new Thread(() -> {
 //            while (true) {
 //                try {
@@ -102,22 +110,22 @@ public class ChatClient {
 //        }).start();
 //    }
     
-    public void sendMessage(String message, String recieverID, Boolean isAllChat) {
+    public void sendMessage(String message, String ReceiverID, Boolean isAllChat) {
         try {
-            if(peer.isPeerMuted(recieverID)){
+            if(peer.isPeerMuted(ReceiverID)){
                 return;
             }
-            chats.get(recieverID).put(peer.id, message, isAllChat);
+            chats.get(ReceiverID).put(peer.id, message, isAllChat);
         }
         catch(Exception e) {System.out.println(e.getMessage());}
     }
 
     public void sendGlobalMessage(String message, List<String> ids) {
-        for (String recieverID : ids) {
-            if(recieverID.equals(peer.id)){
+        for (String ReceiverID : ids) {
+            if(ReceiverID.equals(peer.id)){
                 continue;
             }
-            sendMessage(message, recieverID, true);
+            sendMessage(message, ReceiverID, true);
         }
     }
 
@@ -145,8 +153,19 @@ public class ChatClient {
             message = String.join(" ", Arrays.copyOfRange(commandTag, 2, commandTag.length));
             sendMessage(message, commandTag[1], false);
         } else if (commandTag[0].equals("/c")) {
+
             message = String.join(" ", Arrays.copyOfRange(commandTag, 1, commandTag.length));
             sendGlobalMessage(message, peer.getPeerIds());
+        } else if (commandTag[0].equals("/start")){
+            if(peer.id.equals("0")){
+                sendGlobalMessage("StartGame", peer.getPeerIds());
+                peer.game.initGame();
+                return;
+            }
+            System.out.println("System: You are not allowed to start the game");
+        }
         }
     }
-}
+
+    
+

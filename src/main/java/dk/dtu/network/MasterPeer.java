@@ -4,7 +4,6 @@ import org.jspace.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-
 public class MasterPeer extends Peer {
     public final int MAX_LOBBY_SIZE = 8;
 	SequentialSpace MPrequests;
@@ -15,6 +14,7 @@ public class MasterPeer extends Peer {
     public MasterPeer(String name) {
 		super(name, "9004");
         this.id = generateNewPeerId();
+        this.MPID = this.id;
         addMasterToOwnPeers();
         try {
             locks.put("lock");
@@ -58,13 +58,14 @@ public class MasterPeer extends Peer {
                     Object[] info = MPrequests.get(new ActualField("Helo"), new FormalField(String.class), new FormalField(String.class));
                     // Peer class should take care of this?
                     // Add peer to MB's Peers space. {Id, Name, Ip:port}
-                    //peers.put(peerId,info[1],info[2]);
+                    // peers.put(peerId,info[1],info[2]);
 
                     // Retrieve current peers connected
                     LinkedList<Object[]> peers = this.peers.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class), new FormalField(Boolean.class));
                     if (isLobbyFull()) {
                         MPrequests.put("Lobby is full", info[2]);
                         System.out.println("Lobby is full");
+                        locks.put("loginLock");
                         continue;
                     }
                     MPrequests.put("Approved", info[2]);
@@ -144,7 +145,7 @@ public class MasterPeer extends Peer {
             remoteResp = new SpaceRepository();
             remoteResp.add("chat", chat.getChat());
             peers = new SequentialSpace();
-            
+            remoteResp.add("gameSpace", game.getGameSpace());
             MPrequests = new SequentialSpace();
             MPreadyFlags = new SequentialSpace();
             remoteResp.add("requests", MPrequests);
