@@ -8,23 +8,21 @@ import dk.dtu.game.round.RoundState;
 
 // Keeps track of a list of RoundStates
 
+
 public class GameState {
     int roundId = 0;
     List<Player> players;
     Deck deck = new Deck();
     List<RoundState> history;
     RoundState currentRoundState;
-
-    
     public void createNewRoundState(String peerId) {
         updateRound();
         String dealer = getNewDealer();
         String smallBlind = getNewSmallBlind(dealer);
         String bigBlind = getNewBigBlind(smallBlind);
         String firstPlayer = getNewFirstPlayer(bigBlind);
-        RoundState roundState = new RoundState(roundId, peerId, players, smallBlind , bigBlind, dealer, firstPlayer);
+        RoundState roundState = new RoundState(roundId, peerId, players, smallBlind, bigBlind, dealer, firstPlayer);
         currentRoundState = roundState;
-
     }
     public void assignRoles() {
         if (players.size() >= 3) {
@@ -34,6 +32,7 @@ public class GameState {
         } else {
         }
     }
+
 
     public String getNewDealer(){
         if(currentRoundState == null){
@@ -67,9 +66,10 @@ public class GameState {
         }
         return players.get(0).id;
     }
+    
     public String getNewFirstPlayer(String bigBlind) {
-        int bigBlindint= Integer.parseInt(bigBlind);
-        int nextIndex = bigBlindint+1;
+        int bigBlindint = Integer.parseInt(bigBlind);
+        int nextIndex = bigBlindint + 1;
         if(nextIndex < players.size()){
             return players.get(nextIndex).id;
         }
@@ -113,15 +113,15 @@ public class GameState {
     }
     
     public void removeLosingPlayers(){
-         if (players != null) {
-        players.removeIf(player -> player.getBalance() <= 0);         
-         }
+        if (players != null) {
+            players.removeIf(player -> player.getBalance() <= 0);         
+        }
     }
 
 
 
     public void addPlayer(Player player) {
-        if(players == null){
+        if (players == null) {
             players = new ArrayList<Player>();
         }
         players.add(player);
