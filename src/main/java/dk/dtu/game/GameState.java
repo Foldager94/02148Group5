@@ -24,15 +24,6 @@ public class GameState {
         RoundState roundState = new RoundState(roundId, peerId, players, smallBlind, bigBlind, dealer, firstPlayer);
         currentRoundState = roundState;
     }
-    public void assignRoles() {
-        if (players.size() >= 3) {
-            // players.get(round % players.size()).assignDealer();
-            // players.get((round - 1) % players.size()).assignSmallBlind();
-            // players.get((round - 2) % players.size()).bigBlind();
-        } else {
-        }
-    }
-
 
     public String getNewDealer(){
         if(currentRoundState == null){
@@ -96,15 +87,7 @@ public class GameState {
             history.add(currentRoundState);
         }
     }
-    
-    public void initNewRoundState() {
-        //currentRoundState = new RoundState();
-    }
 
-    public void updatePlayerList() {
-        players = currentRoundState.getPlayers();
-    }
-    
     public void updateGameState() {
         //TODO: update the gameState after round is finished
         updateRound();

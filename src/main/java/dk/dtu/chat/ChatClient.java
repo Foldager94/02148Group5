@@ -13,7 +13,13 @@ import org.jspace.Tuple;
 import dk.dtu.network.Peer;
 import java.io.IOException;
 public class ChatClient {
-    
+    private static final String SYSTEM_COLOR_CODE = "\033[31m";
+    private static final String SYSTEM_RESET_CODE = "\033[0m";
+    private static final String START_GAME = "StartGame";
+    private static final String INTRODUCE_YOURSELF = "IntroduceYourSelf";
+    private static final String GLOBAL_CHAT = "Global";
+    private static final String PRIVATE_CHAT = "Private";
+
     public SequentialSpace chat;
     public SpaceRepository chats;
     public Peer peer;
@@ -28,41 +34,7 @@ public class ChatClient {
         new Thread(() -> {
             while (true) {
                 try {
-                    Tuple messageTuple = new Tuple(chat.get(
-                        new FormalField(String.class), // sender id
-                        new FormalField(String.class), // message
-                        new FormalField(Boolean.class) // isAllChat
-                    ));
-                    String senderId = messageTuple.getElementAt(String.class, 0); // its id
-
-
-
-                   if(!peer.isPeerKnown(senderId)){
-                       sendMessage("IntroduceYourSelf", senderId, false);
-                       continue;
-                   }
-
-                    if(peer.isPeerMuted(senderId)){
-                        sendPeerIsMutedMsg(senderId);
-                        continue;
-                    }
-                    
-                    String message = messageTuple.getElementAt(String.class, 1);
-
-                    if(message.equals("StartGame")){
-                        System.out.println("\033[31mSystem: Game is starting.\033[0m");
-                        peer.game.initGame();
-                        continue;
-                    }
-
-                    if(message.equals("IntroduceYourSelf")){
-                        peer.sendIntroductionMsg(senderId);
-                        continue;
-                    }
-
-                    String senderName = peer.getPeerName(senderId);
-                    String privateOrPublic = messageTuple.getElementAt(Boolean.class, 2) ? "Global" : "Private";
-                    showChat(privateOrPublic, senderName, senderId, message);
+                    handleReceivedMessages();
                 } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
                     Thread.currentThread().interrupt();
@@ -70,6 +42,46 @@ public class ChatClient {
                 }
             }
         }).start();
+    }
+
+    private void handleReceivedMessages() throws InterruptedException {
+        Tuple messageTuple = new Tuple(chat.get(
+                new FormalField(String.class), // sender id
+                new FormalField(String.class), // message
+                new FormalField(Boolean.class)  // isAllChat
+        ));
+        processMessage(messageTuple);
+    }
+
+    private void processMessage(Tuple messageTuple) throws InterruptedException {
+        String senderId = messageTuple.getElementAt(String.class, 0);
+        String message = messageTuple.getElementAt(String.class, 1);
+        boolean isAllChat = messageTuple.getElementAt(Boolean.class, 2);
+
+        if (!peer.isPeerKnown(senderId)) {
+            sendMessage(INTRODUCE_YOURSELF, senderId, false);
+            return;
+        }
+
+        if (peer.isPeerMuted(senderId)) {
+            sendPeerIsMutedMsg(senderId);
+            return;
+        }
+
+        if (START_GAME.equals(message)) {
+            System.out.println(SYSTEM_COLOR_CODE + "System: Game is starting." + SYSTEM_RESET_CODE);
+            peer.game.initGame();
+            return;
+        }
+
+        if (INTRODUCE_YOURSELF.equals(message)) {
+            peer.sendIntroductionMsg(senderId);
+            return;
+        }
+
+        String senderName = peer.getPeerName(senderId);
+        String privateOrPublic = isAllChat ? GLOBAL_CHAT : PRIVATE_CHAT;
+        showChat(privateOrPublic, senderName, senderId, message);
     }
 
     public void showChat(String privateOrPublic, String senderName, String senderId, String message) {
@@ -86,30 +98,6 @@ public class ChatClient {
         }
     }
 
-//    public void startMessageReceiver() {
-//        new Thread(() -> {
-//            while (true) {
-//                try {
-//                    Object[] messageTuple = chat.get(
-//                            new FormalField(String.class), // sender id
-//                            new FormalField(String.class), // message
-//                            new FormalField(Boolean.class) // isAllChat
-//                    );
-//                    String senderId = (String) messageTuple[0]; // its id
-//                    String senderName = peer.getPeerName(senderId);
-//                    String message = (String) messageTuple[1];
-//                    String privateOrPublic = (Boolean) messageTuple[2] ? "Global" : "Private";
-//                    System.out.println(privateOrPublic + " "+ senderName + "#"+ senderId + ": " + message);
-//                } catch (InterruptedException e) {
-//                    System.out.println(e.getMessage());
-//                    Thread.currentThread().interrupt();
-//
-//                    return;
-//                }
-//            }
-//        }).start();
-//    }
-    
     public void sendMessage(String message, String ReceiverID, Boolean isAllChat) {
         try {
             if(peer.isPeerMuted(ReceiverID)){

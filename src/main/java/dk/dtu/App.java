@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import dk.dtu.ui.LobbyScreen;
 import dk.dtu.ui.StartScreen;
-import javafx.application.Application;
+//import javafx.application.Application;
 
 public class App {
     

@@ -24,6 +24,10 @@ import dk.dtu.network.Peer;
 
 
 public class GameClient {
+    private static final String ACTION = "Action";
+    private static final String CONNECTION_STATUS = "ConnectionStatus";
+    private static final String GAME_PHASE = "GamePhase";
+    private static final String ROUND_STATUS = "RoundStatus";
     public QueueSpace gameSpace;
     public SpaceRepository gameSpaces;
     public Peer peer;
@@ -44,7 +48,7 @@ public class GameClient {
                         new FormalField(String.class), // command
                         new FormalField(String.class)  // json
                     ));
-                    gameCommands.commandHandler(messageTuple, gameState.currentRoundState);
+                    gameCommands.commandHandler(messageTuple);
                 } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
                     Thread.currentThread().interrupt();
@@ -64,7 +68,7 @@ public class GameClient {
         startGameCommandReceiver();
         connectToPeersGameSpace();
         ConnectionStatus command = new ConnectionStatus(peer.id, ConnectionStatusType.Ping);
-        sendGlobalCommand(peer.getPeerIds(), "ConnectionStatus", command.toJson());
+        sendGlobalCommand(peer.getPeerIds(), CONNECTION_STATUS, command.toJson());
     }
 
     public void sendCommand(String ReceiverID, String command, String jsonObject) {
@@ -120,7 +124,7 @@ public class GameClient {
 
     public void startNewRound(){
         RoundStatus roundStatus = new RoundStatus(peer.id, RoundStatusType.NewRoundStarted);
-        sendGlobalCommand(peer.getPeerIds(), "RoundStatus", roundStatus.toJson());
+        sendGlobalCommand(peer.getPeerIds(), ROUND_STATUS, roundStatus.toJson());
         gameState.createNewRoundState(peer.id);
         startGamePhases();
     }
@@ -187,9 +191,9 @@ public class GameClient {
             System.out.println("Next player:" + firstPlayerId);
             RoundStatus rsCommand = new RoundStatus(peer.id, RoundStatusType.PlayerTurn);
             if (firstPlayerId.equals(peer.id)) {
-                gameSpace.put("RoundStatus", rsCommand.toJson());
+                gameSpace.put(ROUND_STATUS, rsCommand.toJson());
             } else {
-                sendCommand(firstPlayerId, "RoundStatus", rsCommand.toJson());
+                sendCommand(firstPlayerId, ROUND_STATUS, rsCommand.toJson());
             }
         } catch (InterruptedException e){
             System.err.println("Error sendPlayerTurnCommand");
@@ -205,11 +209,10 @@ public class GameClient {
         for(String id : PeerIds) { // the dealer deals 2 cards to each player
             holeCards = gameState.deck.draw(2);
             GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.PreFlop, holeCards);
-            sendCommand(id, "GamePhase", gpCommand.toJson());
+            sendCommand(id, GAME_PHASE, gpCommand.toJson());
         }
         String bigBlindId = getCurrentRoundState().getBigBlind();
         sendPlayerTurnCommand(bigBlindId);
-        // Send command to player that have to do the first action
 
     }
 
@@ -218,11 +221,10 @@ public class GameClient {
         List<String> PeerIds = peer.getPeerIds();
         for(String id : PeerIds) { // send to all peers, including itself
             GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.Flop, communityCards);
-            sendCommand(id, "GamePhase", gpCommand.toJson());
+            sendCommand(id, GAME_PHASE, gpCommand.toJson());
         }
         String bigBlindId = getCurrentRoundState().getBigBlind();
         sendPlayerTurnCommand(bigBlindId);
-        //sendPlayerTurnCommand(getCurrentRoundState().getFirstPlayerId());
     }
 
     public void initTurn(){
@@ -230,11 +232,10 @@ public class GameClient {
         List<String> PeerIds = peer.getPeerIds();
         for(String id : PeerIds) { // send to all peers, including itself
             GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.Turn, communityCards);
-            sendCommand(id, "GamePhase", gpCommand.toJson());
+            sendCommand(id, GAME_PHASE, gpCommand.toJson());
         }
         String bigBlindId = getCurrentRoundState().getBigBlind();
         sendPlayerTurnCommand(bigBlindId);
-        //sendPlayerTurnCommand(getCurrentRoundState().getFirstPlayerId());
     }
 
     public void initRiver(){
@@ -242,15 +243,13 @@ public class GameClient {
         List<String> PeerIds = peer.getPeerIds();
         for(String id : PeerIds) { // send to all peers, including itself
             GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.River, communityCards);
-            sendCommand(id, "GamePhase", gpCommand.toJson());
+            sendCommand(id, GAME_PHASE, gpCommand.toJson());
         }
         String bigBlindId = getCurrentRoundState().getBigBlind();
         sendPlayerTurnCommand(bigBlindId);
-        //sendPlayerTurnCommand(getCurrentRoundState().getFirstPlayerId());
     }
 
     public void initShowdown(){
-        //Hand hand = new Hand(getCurrentRoundState().getCommunityCards(), getCurrentRoundState().getOwnPlayerObject().getHoleCards(), peer.id);
         Hand hand = gameCommands.getPlayerHand();
         getCurrentRoundState().incrementHandComparingCount();
         getCurrentRoundState().setWinningHand(hand);
@@ -258,36 +257,28 @@ public class GameClient {
         List<String> PeerIds = peer.getPeerIds();
         for(String id : PeerIds) { // send to all peers, including itself
             GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.Showdown, new ArrayList<Card>());
-            sendCommand(id, "GamePhase", gpCommand.toJson());
+            sendCommand(id, GAME_PHASE, gpCommand.toJson());
         }
     }
 
-    public RoundState getCurrentRoundState(){
-        return gameState.currentRoundState;
-    }
 
     public void makeFoldAction(){
         Action foldAction = new Action(peer.id, ActionType.Fold, 0);
         getCurrentRoundState().setPlayerFolded(peer.id);
-        sendGlobalCommand(peer.getPeerIds(), "Action", foldAction.toJson());
+        sendGlobalCommand(peer.getPeerIds(), ACTION, foldAction.toJson());
         printToScreen(getCurrentRoundState().getGamePhaseType().toString());
         getCurrentRoundState().setIsMyTurn(false);
         
         String winningId = isOnlyOnePlayer();
-        if(winningId != null) { // if the player is the last player who haven't folded
-            if (peer.id.equals(getCurrentRoundState().getDealer())) {
-                System.out.println("Last player, end the game!");
-                System.out.println("Last player, end the game!");
-                System.out.println("Last player, end the game!");
-                try {
-                    getCurrentRoundState().addWinningId(winningId);
-                    RoundStatus rs = new RoundStatus(peer.id, RoundStatusType.RoundEnded, getCurrentRoundState().getWinningId());
-                    sendGlobalCommand(peer.getPeerIds(), "RoundStatus", rs.toJson());
-                    gameSpace.put("RoundStatus", rs.toJson());
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+        if (winningId != null && peer.id.equals(getCurrentRoundState().getDealer())) {
+            try {
+                getCurrentRoundState().addWinningId(winningId);
+                RoundStatus rs = new RoundStatus(peer.id, RoundStatusType.RoundEnded, getCurrentRoundState().getWinningId());
+                sendGlobalCommand(peer.getPeerIds(), ROUND_STATUS, rs.toJson());
+                gameSpace.put(ROUND_STATUS, rs.toJson());
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
     }
@@ -300,7 +291,7 @@ public class GameClient {
         int highestBet = Collections.max(allbets);
         if (myBet == highestBet){
             Action checkAction = new Action(peer.id, ActionType.Check, 0);
-            sendGlobalCommand(peer.getPeerIds(), "Action", checkAction.toJson());
+            sendGlobalCommand(peer.getPeerIds(), ACTION, checkAction.toJson());
             getCurrentRoundState().setIsMyTurn(false);
             printToScreen(getCurrentRoundState().getGamePhaseType().toString());
             if (peer.id.equals(getCurrentRoundState().getDealer())) {
@@ -352,7 +343,7 @@ public class GameClient {
         currentRoundState.setLastRaise(peer.id);
         getCurrentRoundState().addToPot(toBeRaisedWith);
         Action raiseAction = new Action(peer.id, ActionType.Raise, intAmount);
-        sendGlobalCommand(peer.getPeerIds(), "Action", raiseAction.toJson());
+        sendGlobalCommand(peer.getPeerIds(), ACTION, raiseAction.toJson());
         getCurrentRoundState().setIsMyTurn(false);
         printToScreen(getCurrentRoundState().getGamePhaseType().toString());
     }
@@ -361,7 +352,7 @@ public class GameClient {
         //TODO: Update own roundState, so balance and bets matches
         getCurrentRoundState().calcPlayerCall(peer.id);
         Action callAction = new Action(peer.id, ActionType.Call, 0);
-        sendGlobalCommand(peer.getPeerIds(), "Action", callAction.toJson());
+        sendGlobalCommand(peer.getPeerIds(), ACTION, callAction.toJson());
         getCurrentRoundState().setIsMyTurn(false);
         printToScreen(getCurrentRoundState().getGamePhaseType().toString());
     }
@@ -394,6 +385,10 @@ public class GameClient {
         return getCurrentRoundState().getLastPlayer().equals(peerId);        
     }
 
+
+    public RoundState getCurrentRoundState(){
+        return gameState.currentRoundState;
+    }
     public void gameCommandHandler(String command){
         String[] commandTag = command.split(" ");
         if(commandTag.length < 2){
