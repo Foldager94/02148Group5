@@ -41,7 +41,7 @@ public class RoundState {
         this.players = players;
         this.smallBlind = smallBlind;
         this.bigBlind = bigBlind;
-        this.dealer = dealer;    
+        this.dealer = dealer;
         this.bets = new ArrayList<>();    
         this.pot = 0;
         this.firstPlayer = firstPlayer;
@@ -51,10 +51,21 @@ public class RoundState {
         for (int i = 0; i < players.size(); i++) {
             bets.add(0);
         }
+        setAllPlayersInRound();
+    }
+
+    public void setAllPlayersInRound(){
+        for(Player p: players){
+            p.setInRound(true);
+        }
     }
 
     public String getLastPlayer() {
         return lastPlayer;
+    }
+
+    public String getFirstPlayer() {
+        return firstPlayer;
     }
 
     public void incrementHandComparingCount(){

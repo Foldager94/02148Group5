@@ -10,8 +10,10 @@ import dk.dtu.game.commands.RoundStatus;
 import dk.dtu.game.round.RoundState;
 import dk.dtu.game.commands.GamePhase;
 import dk.dtu.game.commands.SyncState;
+
 public class GameCommands{
     GameClient gameClient;
+
     public GameCommands(GameClient gameClient){
         this.gameClient = gameClient;
     }
@@ -21,7 +23,6 @@ public class GameCommands{
         return readyCount == gameClient.peer.chat.chats.size()+1;
     }
     
-
     public void commandHandler(Tuple messageTuple, RoundState roundState) throws InterruptedException {
         String command = messageTuple.getElementAt(String.class, 0);
         String jsonObject = messageTuple.getElementAt(String.class, 1);
@@ -37,6 +38,8 @@ public class GameCommands{
             // Mangler command for showdown, newRoundStarted, RoundEnded og Broke
         }
     }
+
+
 
     // function to hande an incoming action from another player
     public void actionCommand(String jsonObject){
@@ -57,8 +60,7 @@ public class GameCommands{
                 String winningId = gameClient.isOnlyOnePlayer();
                 if (winningId != null) { 
                     // Have not looked at this part yet.
-                    System.out.println("There is only 1 player left, which have won! (TODO)");
-                    if (getOwnId().equals(getDealerId())) {
+                    if (isDealer()) {
                         gameClient.getCurrentRoundState().addWinningId(winningId);
                         RoundStatus rs = new RoundStatus(getOwnId(), RoundStatusType.RoundEnded, gameClient.getCurrentRoundState().getWinningId());
                         gameClient.sendGlobalCommand(gameClient.peer.getPeerIds(), "RoundStatus", rs.toJson());
@@ -70,14 +72,11 @@ public class GameCommands{
                         }
                     }
                 } else { // game is not over
-                    if (getOwnId().equals(getDealerId())) { // if delear
-                        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAA");
+                    if (isDealer()) { // if delear
                         if (updateLast) { // the folded player was the last player in the round, so continue
-                            System.out.println("Init new round!!!!");
                             System.out.println("Ready for next phase"); // goto next phase
                             gameClient.initNextPhase();
                         } else {
-                            System.out.println("Appoiht new first player!!!!!");
                             gameClient.sendPlayerTurnCommand(action.getSenderId());
                         }
                     }
@@ -91,7 +90,7 @@ public class GameCommands{
             case Raise:
                 gameClient.getCurrentRoundState().calcPlayerRaise(action.getSenderId(), action.getAmount());
                 gameClient.getCurrentRoundState().setLastRaise(action.getSenderId());
-                if (getOwnId().equals(getDealerId())) {
+                if (isDealer()) {
                     gameClient.sendPlayerTurnCommand(action.getSenderId());
                 }
                 printToScreen();
@@ -101,14 +100,7 @@ public class GameCommands{
                 }
                 break;
             case Check:
-                if (getOwnId().equals(getDealerId())) {
-                    if (!gameClient.isLastPlayer(action.getSenderId())) {  // if the sender was not the last player
-                        gameClient.sendPlayerTurnCommand(action.getSenderId()); // tell next player to move
-                    } else if (gameClient.isLastPlayer(action.getSenderId())) { // else if the sender was the last player
-                        System.out.println("Ready for Flop"); // goto next phase
-                        gameClient.initNextPhase();
-                    }
-                }
+                dealerPickNextPlayerOrNewPhase(action.getSenderId());
                 printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 if (gameClient.getCurrentRoundState().getIsMyTurn()) {
@@ -117,14 +109,7 @@ public class GameCommands{
                 break;
             case Call:
                 gameClient.getCurrentRoundState().calcPlayerCall(action.getSenderId());
-                if (getOwnId().equals(getDealerId())) { // Check if own player is dealer
-                    if (!gameClient.isLastPlayer(action.getSenderId())) {  // if the sender was not the last player
-                        gameClient.sendPlayerTurnCommand(action.getSenderId());
-                    } else if (gameClient.isLastPlayer(action.getSenderId())) { // else if the sender was the last player
-                        System.out.println("Ready for Flop"); // goto next phase
-                        gameClient.initNextPhase();
-                    }
-                }
+                dealerPickNextPlayerOrNewPhase(action.getSenderId());
                 printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 if (gameClient.getCurrentRoundState().getIsMyTurn()) {
@@ -133,6 +118,21 @@ public class GameCommands{
                 break;
             default:
                 break;
+        }
+    }
+
+    public boolean isDealer(){
+        return getOwnId().equals(getDealerId());
+    }
+
+    public void dealerPickNextPlayerOrNewPhase(String peerId) {
+        if (isDealer()) {
+            if (!gameClient.isLastPlayer(peerId)) {  // if the sender was not the last player
+                gameClient.sendPlayerTurnCommand(peerId); // tell next player to move
+            } else if (gameClient.isLastPlayer(peerId)) { // else if the sender was the last player
+                System.out.println("Ready for Flop"); // goto next phase
+                gameClient.initNextPhase();
+            }
         }
     }
 
@@ -152,7 +152,6 @@ public class GameCommands{
                 System.out.println("Pong From: " + connectionStatus.getSenderId());
                 if(!gameClient.connectionEstablishedToAll()){ break;}
                 System.out.println("All Connections established");
-                
                 connectionStatusResponse = new ConnectionStatus(
                     getOwnId(),
                     ConnectionStatusType.ConnectionsEstablished
@@ -208,7 +207,6 @@ public class GameCommands{
                 gameClient.getCurrentRoundState().setLastRaise(null);
                 printToScreen();
                 System.out.println();
-
                 break;
             case Showdown:
                 setGamePhaseType(GamePhaseType.Showdown);
@@ -268,6 +266,7 @@ public class GameCommands{
         return gameClient.getCurrentRoundState().getFirstPlayerId().equals(peerId);
     }
 
+    // recived by all peers
     public void roundStatusCommand(String jsonObject, RoundState roundState) {
         RoundStatus roundStatus = RoundStatus.fromJson(jsonObject);
         //RoundStatus roundStatusResponse;
@@ -312,7 +311,7 @@ public class GameCommands{
         messageTuple.getElementAt(String.class, 0) + ": "+ messageTuple.getElementAt(String.class, 1));
     }
 
-    public void setGamePhaseType(GamePhaseType gamePhase){
+    public void setGamePhaseType(GamePhaseType gamePhase) {
         gameClient.getCurrentRoundState().setGamePhaseType(gamePhase);
     }
 
@@ -323,6 +322,7 @@ public class GameCommands{
     public void addCardsToCommunityCards(List<Card> communityCards){
         gameClient.gameState.currentRoundState.addCardsToCommunityCards(communityCards);
     }
+    
     public void setHoleCards(List<Card> holeCards){
         gameClient.getCurrentRoundState().getOwnPlayerObject().setHoleCards(holeCards);
     }
@@ -361,11 +361,12 @@ public class GameCommands{
     }
 
     public void printToScreen(){
-        // clearScreen();
+        clearScreen();
         System.out.println("\n");
-        System.out.println(gameClient.getCurrentRoundState().getGamePhaseType().toString() + " Command");
+        System.out.println("Round: " + gameClient.getCurrentRoundState().getroundId());
+        System.out.println(gameClient.getCurrentRoundState().getGamePhaseType().toString());
         System.out.println(gameClient.getCurrentRoundState().getOwnPlayerObject().getInRound() ? "You are still in" : "You have folded");
-        System.out.println("Smallblind: " + gameClient.getCurrentRoundState().getSmallBlind() + " | Bigblind: "  +gameClient.getCurrentRoundState().getBigBlind());
+        System.out.println("First Player: " + gameClient.getCurrentRoundState().getFirstPlayer() +" | Smallblind: " + gameClient.getCurrentRoundState().getSmallBlind() + " | Bigblind: "  +gameClient.getCurrentRoundState().getBigBlind());
         System.out.println("Your Balance: " + gameClient.getCurrentRoundState().getOwnPlayerObject().getBalance());
         System.out.println("Bets: " + gameClient.getCurrentRoundState().getBets());
         System.out.println("Pot: " + gameClient.getCurrentRoundState().getPot());

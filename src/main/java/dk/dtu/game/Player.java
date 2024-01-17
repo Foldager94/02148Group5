@@ -49,6 +49,9 @@ public class Player {
     public boolean isInGame() {
       return this.balance> 0 ? true: false;
     }
+    public void setInRound(boolean val){
+        this.inRound = val;
+    }
     public void fold()  {
         this.inRound=false;
     }
