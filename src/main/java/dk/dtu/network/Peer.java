@@ -106,7 +106,6 @@ public class Peer {
             String peerUri  = (String)peer.get(2);
             Boolean isMuted = false;
             addPeer(peerId, peerName, peerUri);
-            // peers.put(peerId, peerName, peerUri, isMuted);
             showTryingtoConnectToPear(peerId, peerName, peerUri);
             // chat.addChatToRepo(peerId,peerUri);
         }

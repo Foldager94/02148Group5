@@ -41,78 +41,95 @@ public class GameCommands{
     // function to hande an incoming action from another player
     public void actionCommand(String jsonObject){
         Action action = Action.fromJson(jsonObject);
-        switch(action.getAction()){
+        switch (action.getAction()) {
             case Fold:
-                if(isFirstPlayer(action.getSenderId())){
-                    gameClient.getCurrentRoundState().setNewFirstPlayer(action.getSenderId());
-                    System.out.println(gameClient.getCurrentRoundState().getFirstPlayerId());
-                }
+                Boolean updateLast = false;
                 gameClient.getCurrentRoundState().setPlayerFolded(action.getSenderId());
+                if (isFirstPlayer(action.getSenderId())) {
+                    System.out.println("Was the first player");
+                    gameClient.getCurrentRoundState().setNewFirstPlayer(action.getSenderId());
+                    System.out.println("New first player: " + gameClient.getCurrentRoundState().getFirstPlayerId());
+                }
+                if (gameClient.isLastPlayer(action.getSenderId())) {
+                    gameClient.getCurrentRoundState().updateLastPlayer();
+                    updateLast = true;
+                }
                 String winningId = gameClient.isOnlyOnePlayer();
-                if(winningId != null){
-                    System.out.println("You are the last player, you have won! (TODO)");
-                    if(getOwnId().equals(getDealerId())){
-                            gameClient.getCurrentRoundState().addWinningId(winningId);
-                            RoundStatus rs = new RoundStatus(getOwnId(), RoundStatusType.RoundEnded, gameClient.getCurrentRoundState().getWinningId());
-                            gameClient.sendGlobalCommand(gameClient.peer.getPeerIds(), "RoundStatus", rs.toJson());
-                            try {
-                                gameClient.gameSpace.put("RoundStatus", rs.toJson());
-                            } catch (InterruptedException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
+                if (winningId != null) { 
+                    // Have not looked at this part yet.
+                    System.out.println("There is only 1 player left, which have won! (TODO)");
+                    if (getOwnId().equals(getDealerId())) {
+                        gameClient.getCurrentRoundState().addWinningId(winningId);
+                        RoundStatus rs = new RoundStatus(getOwnId(), RoundStatusType.RoundEnded, gameClient.getCurrentRoundState().getWinningId());
+                        gameClient.sendGlobalCommand(gameClient.peer.getPeerIds(), "RoundStatus", rs.toJson());
+                        try {
+                            gameClient.gameSpace.put("RoundStatus", rs.toJson());
+                        } catch (InterruptedException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
                         }
                     }
-                
-                if(getOwnId().equals(getDealerId())){
-                    if(!isLastPlayer(action.getSenderId())){  // if the sender was not the last player
-                        gameClient.sendPlayerTurnCommand(action.getSenderId());
-                    } else if(isLastPlayer(action.getSenderId())){ // else if the sender was the last player
-                        System.out.println("Ready for Flop"); // goto next phase
-
-                        gameClient.initNextPhase();
+                } else { // game is not over
+                    if (getOwnId().equals(getDealerId())) { // if delear
+                        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAA");
+                        if (updateLast) { // the folded player was the last player in the round, so continue
+                            System.out.println("Init new round!!!!");
+                            System.out.println("Ready for next phase"); // goto next phase
+                            gameClient.initNextPhase();
+                        } else {
+                            System.out.println("Appoiht new first player!!!!!");
+                            gameClient.sendPlayerTurnCommand(action.getSenderId());
+                        }
                     }
                 }
                 printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
+                if (gameClient.getCurrentRoundState().getIsMyTurn()) {
+                    System.out.println("It is your turn to make a move");
+                }
                 break;
             case Raise:
                 gameClient.getCurrentRoundState().calcPlayerRaise(action.getSenderId(), action.getAmount());
                 gameClient.getCurrentRoundState().setLastRaise(action.getSenderId());
-                if(getOwnId().equals(getDealerId())){
+                if (getOwnId().equals(getDealerId())) {
                     gameClient.sendPlayerTurnCommand(action.getSenderId());
                 }
                 printToScreen();
-                System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() + (action.getAmount()!=0 ?" " +action.getAmount():"" ));
-            break;
-
+                System.out.println("Last Move: " + action.getSenderId() + " did a " + action.getAction() + (action.getAmount() !=0  ? " " + action.getAmount() : "" ));
+                if (gameClient.getCurrentRoundState().getIsMyTurn()) {
+                    System.out.println("It is your turn to make a move");
+                }
+                break;
             case Check:
-                if(getOwnId().equals(getDealerId())){
-                    if(!isLastPlayer(action.getSenderId())){  // if the sender was not the last player
-                        gameClient.sendPlayerTurnCommand(action.getSenderId());
-                    } else if(isLastPlayer(action.getSenderId())){ // else if the sender was the last player
+                if (getOwnId().equals(getDealerId())) {
+                    if (!gameClient.isLastPlayer(action.getSenderId())) {  // if the sender was not the last player
+                        gameClient.sendPlayerTurnCommand(action.getSenderId()); // tell next player to move
+                    } else if (gameClient.isLastPlayer(action.getSenderId())) { // else if the sender was the last player
                         System.out.println("Ready for Flop"); // goto next phase
-
                         gameClient.initNextPhase();
                     }
                 }
                 printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
+                if (gameClient.getCurrentRoundState().getIsMyTurn()) {
+                    System.out.println("It is your turn to make a move");
+                }
                 break;
             case Call:
                 gameClient.getCurrentRoundState().calcPlayerCall(action.getSenderId());
-
-                if(getOwnId().equals(getDealerId())){ // Check if own player is dealer
-                    if(!isLastPlayer(action.getSenderId())){  // if the sender was not the last player
-                            gameClient.sendPlayerTurnCommand(action.getSenderId());
-                    } else if(isLastPlayer(action.getSenderId())){ // else if the sender was the last player
+                if (getOwnId().equals(getDealerId())) { // Check if own player is dealer
+                    if (!gameClient.isLastPlayer(action.getSenderId())) {  // if the sender was not the last player
+                        gameClient.sendPlayerTurnCommand(action.getSenderId());
+                    } else if (gameClient.isLastPlayer(action.getSenderId())) { // else if the sender was the last player
                         System.out.println("Ready for Flop"); // goto next phase
-
-                            gameClient.initNextPhase();
+                        gameClient.initNextPhase();
                     }
                 }
                 printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
+                if (gameClient.getCurrentRoundState().getIsMyTurn()) {
+                    System.out.println("It is your turn to make a move");
+                }
                 break;
             default:
                 break;
@@ -137,24 +154,23 @@ public class GameCommands{
                 System.out.println("All Connections established");
                 
                 connectionStatusResponse = new ConnectionStatus(
-                        getOwnId(),
-                        ConnectionStatusType.ConnectionsEstablished
+                    getOwnId(),
+                    ConnectionStatusType.ConnectionsEstablished
                 );
                 if(getOwnId().equals(getMPId())){ 
                     gameClient.gameSpace.put("ConnectionStatus", connectionStatusResponse.toJson());                  
                     break; 
                 }    
                 sendCommand(
-                        getMPId(),
-                        "ConnectionStatus",
-                        connectionStatusResponse.toJson()
+                    getMPId(),
+                    "ConnectionStatus",
+                    connectionStatusResponse.toJson()
                 );
                 break;
             case ConnectionsEstablished:
                 readyCount++;
-                System.out.println(connectionStatus.getSenderId()+ " is Ready.");
+                System.out.println(connectionStatus.getSenderId() + " is Ready.");
                 if(isEveryoneReady()){
-                   // TimeUnit.SECONDS.sleep(5);
                     gameClient.startNewRound();
                 }
                 break;
@@ -202,8 +218,6 @@ public class GameCommands{
                     Hand hand = getPlayerHand();
                     gameClient.sendCommand(getDealerId(), "DeterminHand", hand.toJson());
                 }
-                // Calculate best hand
-                // Send Best Hand To Dealer
             default:
                 break;
                 
@@ -238,20 +252,6 @@ public class GameCommands{
         }   
     }
 
-    public boolean isLastPlayer(String previusePeerId) {
-        String nextPlayerId = gameClient.getCurrentRoundState().getNextNonFoldedPlayer(previusePeerId);
-        String lastPlayer;
-        //String lastRaiseId = gameClient.getCurrentRoundState().getLastRaise();
-        if (gameClient.getCurrentRoundState().getLastRaise() != null) {
-            lastPlayer = gameClient.getCurrentRoundState().getLastRaise();
-        } else {
-            lastPlayer = gameClient.getCurrentRoundState().getFirstPlayerId();
-        }
-
-        System.out.println("previusePeerId: " + previusePeerId + " | " + "nextPlayerId: " + nextPlayerId + " | lastPlayer: " + lastPlayer);
-        return nextPlayerId.equals(lastPlayer);
-    }
-
     public boolean isMyTurn(String previusePeerId) {
         if (!gameClient.getCurrentRoundState().getOwnPlayerObject().getInRound()) {
             return false;
@@ -278,7 +278,6 @@ public class GameCommands{
                     gameClient.startGamePhases();
                 }
                 break;
-                
             case RoundEnded: 
                 // split the pot amoung the winning players (simplified)
                 int winning = (gameClient.getCurrentRoundState().getPot() / roundStatus.getWinners().size());
@@ -295,7 +294,6 @@ public class GameCommands{
                         e.printStackTrace();
                     }
                 }
-               
                 break;
             case PlayerTurn:
                 gameClient.getCurrentRoundState().setIsMyTurn(true);
@@ -305,20 +303,14 @@ public class GameCommands{
         }
     }
 
-
     public void syncStateCommand(String jsonObject, RoundState roundState){
         SyncState syncState = SyncState.fromJson(jsonObject);
     }
 
 	private void unknownCommand(Tuple messageTuple) {
         System.err.println("GameClient: Command unknown " +
-        messageTuple.getElementAt(String.class, 0)+ ": "+ messageTuple.getElementAt(String.class, 1));
-    }    
-    
-    
-
-    // Auxiliary functions
-
+        messageTuple.getElementAt(String.class, 0) + ": "+ messageTuple.getElementAt(String.class, 1));
+    }
 
     public void setGamePhaseType(GamePhaseType gamePhase){
         gameClient.getCurrentRoundState().setGamePhaseType(gamePhase);
@@ -364,14 +356,14 @@ public class GameCommands{
         System.out.flush();  
     }
 
-
     public Hand getPlayerHand() {
         return new Hand(gameClient.getCurrentRoundState().getCommunityCards(), gameClient.getCurrentRoundState().getOwnPlayerObject().getHoleCards(), getOwnId());
     }
 
     public void printToScreen(){
-        clearScreen();
-        System.out.println(gameClient.getCurrentRoundState().getGamePhaseType().toString());
+        // clearScreen();
+        System.out.println("\n");
+        System.out.println(gameClient.getCurrentRoundState().getGamePhaseType().toString() + " Command");
         System.out.println(gameClient.getCurrentRoundState().getOwnPlayerObject().getInRound() ? "You are still in" : "You have folded");
         System.out.println("Smallblind: " + gameClient.getCurrentRoundState().getSmallBlind() + " | Bigblind: "  +gameClient.getCurrentRoundState().getBigBlind());
         System.out.println("Your Balance: " + gameClient.getCurrentRoundState().getOwnPlayerObject().getBalance());

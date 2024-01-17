@@ -22,14 +22,17 @@ public class RoundState {
     private List<Player> players;
     private List<Card> communityCards;
     private List<Integer> bets;
+
     private String lastRaise = null;
+    private String lastPlayer = null;
     private String firstPlayer = null;
+    private String ORIG_LAST_PLAYER = null;
+
     private GamePhaseType gamePhaseType = null;
     boolean isMyTurn = false;
     private Hand winningHand = null;
     private List<String> winningIds = new ArrayList<>();
     private int handComparingCount = 0;
-
     
 
     public RoundState(int roundId, String peerId, List<Player> players, String smallBlind, String bigBlind, String dealer, String firstPlayer){
@@ -42,10 +45,16 @@ public class RoundState {
         this.bets = new ArrayList<>();    
         this.pot = 0;
         this.firstPlayer = firstPlayer;
+        this.lastPlayer = bigBlind; // the big blind is the last player to get their turn
+        this.ORIG_LAST_PLAYER = bigBlind;
         communityCards = new ArrayList<>();
         for (int i = 0; i < players.size(); i++) {
             bets.add(0);
         }
+    }
+
+    public String getLastPlayer() {
+        return lastPlayer;
     }
 
     public void incrementHandComparingCount(){
@@ -76,9 +85,6 @@ public class RoundState {
     public List<String> getWinningId() {
         return winningIds;
     }
-
-
-
     
     public List<Player> getPlayers(){
         return players;
@@ -92,11 +98,11 @@ public class RoundState {
         return pot;
     }
 
-    public List<Integer> getBets(){
+    public List<Integer> getBets() {
         return bets;
     }
 
-    public int addBet(int bet){
+    public int addBet(int bet) {
         return bet;
     }
     public List<Integer> addBetToListOfBets(int bet) {
@@ -106,7 +112,7 @@ public class RoundState {
        
     }
 
-    public String getFirstPlayerId(){
+    public String getFirstPlayerId() {
         return firstPlayer;
     }
 
@@ -148,8 +154,38 @@ public class RoundState {
         return lastRaise;
     }
 
-    public void setLastRaise(String lastRaise){
-        this.lastRaise =lastRaise;
+    public void setLastRaise(String lastRaise) {
+        this.lastRaise = lastRaise;
+        if (lastRaise != null) {
+            System.out.println("Prev val for lastplayer: " + lastPlayer);
+            this.lastPlayer = getNonFoldedPlayerBefore(lastRaise);
+            System.out.println("Updated val for lastplayer: " + lastPlayer);
+        } else {
+            this.lastPlayer = this.ORIG_LAST_PLAYER;
+        }
+    }
+
+    public void updateLastPlayer() {
+        this.lastPlayer = getNonFoldedPlayerBefore(this.lastPlayer);
+        System.out.println("New last player: " + lastPlayer);
+        this.ORIG_LAST_PLAYER = this.lastPlayer;
+    }
+
+    public String getNonFoldedPlayerBefore(String foldId) {
+        String alive = "none";
+        String next = nextPlayer(foldId);
+        while (true) { // find alive player before raiser
+            System.out.println("WHille");
+            System.out.println("current: " + next + "| fold: " + foldId);
+            if (next.equals(foldId)) {
+                return alive;
+            } else {
+                if (getPlayer(next).getInRound()) {
+                    alive = next;
+                }
+                next = nextPlayer(next);
+            }
+        }
     }
 
     public List<Card> getCommunityCards(){
@@ -195,43 +231,29 @@ public class RoundState {
     }
 
     public void setNewFirstPlayer(String previousFirstId){ // called if the previos first player folds
-        String pId = previousFirstId;
-        while(true) {
-            pId = nextPlayer(pId);
-            if (getPlayer(pId).getInRound()) { // if the player has not folded
-                firstPlayer = pId;
-                return;
-            }
-        }
+        firstPlayer = getNextNonFoldedPlayer(previousFirstId);
     }
 
     public void addCardsToCommunityCards(List<Card> cards) {
         communityCards.addAll(cards);
     }
-
     
     public void setPlayerFolded(String peerId) {
         Player player = getPlayer(peerId);
         player.fold();
-        if(peerId.equals(firstPlayer)){
-            setNewFirstPlayer(peerId);
-        }
     }
     
     public void calcPlayerRaise(String peerId, int amount){
         Player p = getPlayer(peerId);
 
         int topBet = Collections.max(bets);
-        int myBet = bets.get(findPlayerIndexById(peerId));
-        int amountNeededToCall = topBet - myBet;
+        int pBet = bets.get(findPlayerIndexById(peerId));
+        int amountNeededToCall = topBet - pBet;
 
-
-        p.removeFromBalance(amountNeededToCall+amount);
-        addToPlayerBet(peerId, amountNeededToCall+amount);
+        p.removeFromBalance(amountNeededToCall + amount);
+        addToPlayerBet(peerId, amountNeededToCall + amount);
         lastRaise = peerId;
-        pot += amount+amountNeededToCall;
-        System.out.println(pot);
-        
+        pot += amount + amountNeededToCall;        
     }
 
     public boolean getIsMyTurn(){
@@ -249,13 +271,11 @@ public class RoundState {
     public void calcPlayerCall(String peerId){
         Player p = getPlayer(peerId);
 
-
         int topBet = Collections.max(bets);
         int myBet = bets.get(findPlayerIndexById(peerId));
         int amountNeededToCall = topBet - myBet;
-
         
-        System.out.println(topBet+ " " + myBet + " " + amountNeededToCall);
+        // System.out.println(topBet+ " " + myBet + " " + amountNeededToCall);
         if(amountNeededToCall > p.getBalance()){
             amountNeededToCall = p.getBalance();
         }
@@ -277,7 +297,7 @@ public class RoundState {
     
     public void addToPlayerBet(String peerId, int amount){
         int pIndex = findPlayerIndexById(peerId);
-        System.out.println("YOU HAVE NOW BETTER: " + amount + bets.get(pIndex));
+        // System.out.println("YOU HAVE NOW BETTER: " + amount + bets.get(pIndex));
         bets.set(pIndex, amount + bets.get(pIndex));
     }
 
