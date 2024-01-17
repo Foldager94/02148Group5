@@ -2,7 +2,6 @@ package dk.dtu.ui.components;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
@@ -32,7 +31,7 @@ public class PlayersListView {
     public void addName(String name) {
         myObservableList.add(new HBoxCell(name, host));
     }
-
+    
     public int getHeight() {
         return height;
     }
@@ -40,5 +39,5 @@ public class PlayersListView {
     public ListView<HBoxCell> getView() {
         return listView;
     }
-    
+
 }

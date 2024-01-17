@@ -27,7 +27,7 @@ public class Peer {
     public SpaceRepository remoteResp; // the peers remote repository(s)
     public SequentialSpace peers; // (id, name, uri, isMuted)
     //public SpaceRepository chats;  // contains all chats to the other peers
-    public String MPIP = "10.209.157.221";
+    public String MPIP = "localhost";
     public String MPPort = "9004";
     public String MPID;
     public String ip;

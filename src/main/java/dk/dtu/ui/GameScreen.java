@@ -25,6 +25,8 @@ public class GameScreen {
 	private ScreenSize screenSize;
 
 	private static Pane root = new Pane();
+	private GameClient gameClient;
+
 
 	public GameScreen(ScreenSize screenSize, GameClient gameClient) {
 		this.screenSize = screenSize;

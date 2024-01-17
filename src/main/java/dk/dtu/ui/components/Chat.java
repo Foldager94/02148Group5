@@ -24,7 +24,7 @@ public class Chat {
     private ScrollPane chatContainer = new ScrollPane();
     private int index = 0;
     private TextField messageInput = new TextField();
-    private final int WIDTH = 800;
+    private final int WIDTH = 650;
     private Peer peer;
     
     public Chat(ChatController chatClient, Peer peer) {
@@ -50,7 +50,7 @@ public class Chat {
 			}
 		});
 		Button sendMessage = new Button("Send");
-		sendMessage.setLayoutX(600);
+		sendMessage.setLayoutX(450);
 		sendMessage.setLayoutY(205);
 		sendMessage.getStyleClass().add("send-message");
         sendMessage.setOnAction(event -> {

@@ -65,7 +65,7 @@
     -fx-border-color:#0d5e2a;
     -fx-background-insets: 0;
     -fx-padding: 0;
-    -fx-pref-width: 800px; 
+    -fx-pref-width: 650px; 
 }
 
 .list-view:focused {

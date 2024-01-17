@@ -1,5 +1,5 @@
 .chatbox{
-    -fx-max-width: 784px;
+    -fx-max-width: 634px;
     -fx-background-color: #262522; 
     -fx-padding: 4 4 4 4;
 }
@@ -25,7 +25,7 @@
 }
 
 .message-field {
-    -fx-pref-width: 595px; 
+    -fx-pref-width: 445px; 
     -fx-pref-height: 40px; 
     -fx-font-size: 18;
     -fx-background-color: #262522; 

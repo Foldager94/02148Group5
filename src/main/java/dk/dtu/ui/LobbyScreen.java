@@ -40,12 +40,12 @@ public class LobbyScreen {
 		header.getStyleClass().add("header");
 		ListView<HBoxCell> listView = playersListView.getView();
 
-		listView.setLayoutX(100);
+		listView.setLayoutX(50);
 		listView.setLayoutY(150);
 
 		chat = new Chat(getChat(peer), peer);
 		chatContainer = chat.getView();
-		chatContainer.setLayoutX(100);
+		chatContainer.setLayoutX(50);
 		chatContainer.setLayoutY(150 + playersListView.getHeight() + 10);
 
 		root.getChildren().addAll(listView, header, chatContainer);

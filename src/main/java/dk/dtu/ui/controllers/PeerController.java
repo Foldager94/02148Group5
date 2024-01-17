@@ -1,6 +1,7 @@
 package dk.dtu.ui.controllers;
 
 import dk.dtu.chat.ChatClient;
+import dk.dtu.game.GameClient;
 import dk.dtu.network.Peer;
 import dk.dtu.ui.components.PlayersListView;
 import javafx.application.Platform;
@@ -18,6 +19,11 @@ public class PeerController extends Peer  {
     @Override
     public void initChatClient() {
         chat = new ChatController(this);
+    }
+
+    @Override
+    public void initGameClient() {
+        game = new GameClientController(this, chat);
     }
 
     @Override

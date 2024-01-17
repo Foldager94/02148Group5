@@ -21,16 +21,26 @@ public class CreateLobbyScreen extends LobbyScreen {
         super.initGraphics(true);
         Button startButton = new Button("Start game");
         startButton.setLayoutY(150);
-        
         startButton.getStyleClass().add("main-button");
+        startButton.setOnAction(event -> {
+            startGame();
+		});
         getRoot().getChildren().add(startButton);
-        startButton.setLayoutX(150 + 784);
+        startButton.setLayoutX(150 + 554);
+    }
+
+    public void startGame() {
+        System.out.println("Starting game!!!!!!!!!!!!");
+        getChat(getPeer()).sendGlobalMessage("StartGame", getPeer().getPeerIds());
+        getPeer().game.initGame();
     }
 
     @Override
 	public ChatController getChat(Peer peer) {
 		return (ChatController)(peer.chat);
 	}
+
+    
 
     private void kick() {
 

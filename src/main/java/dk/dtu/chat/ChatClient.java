@@ -164,8 +164,8 @@ public class ChatClient {
             }
             System.out.println("System: You are not allowed to start the game");
         }
-        }
     }
+}
 
     
 

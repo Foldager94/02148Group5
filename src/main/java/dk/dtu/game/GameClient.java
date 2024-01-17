@@ -28,14 +28,20 @@ public class GameClient {
     public SpaceRepository gameSpaces;
     public Peer peer;
     public GameState gameState;
-    public final GameCommands gameCommands = new GameCommands(this);
+    public GameCommands gameCommands;
     
     public GameClient(Peer peer) {
+        initGameCommands();
         gameSpace = new QueueSpace();
         gameSpaces = new SpaceRepository();
         gameState = new GameState();
         this.peer = peer;
     }
+
+    public void initGameCommands() {
+        gameCommands = new GameCommands(this);
+    }
+
     public void startGameCommandReceiver() {
         new Thread(() -> {
             while(true){
@@ -66,7 +72,7 @@ public class GameClient {
         ConnectionStatus command = new ConnectionStatus(peer.id, ConnectionStatusType.Ping);
         sendGlobalCommand(peer.getPeerIds(), "ConnectionStatus", command.toJson());
     }
-
+    
     public void sendCommand(String ReceiverID, String command, String jsonObject) {
         try {
             getPeerGameSpace(ReceiverID).put(command, jsonObject);
