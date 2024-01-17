@@ -186,8 +186,6 @@ public class RoundState {
         String alive = "none";
         String next = nextPlayer(foldId);
         while (true) { // find alive player before raiser
-            System.out.println("WHille");
-            System.out.println("current: " + next + "| fold: " + foldId);
             if (next.equals(foldId)) {
                 return alive;
             } else {

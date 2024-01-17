@@ -84,8 +84,9 @@ public class GameState {
 
     public void addRoundStateToHistory(){
         if (currentRoundState != null) {
-            history.add(currentRoundState);
+           history=new ArrayList<>();
         }
+        history.add(currentRoundState);
     }
 
     public void updateGameState() {

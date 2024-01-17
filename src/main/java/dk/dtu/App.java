@@ -25,7 +25,7 @@ import dk.dtu.ui.StartScreen;
 
 public class App {
     
-    // public static void main(String[] args) {
+    // public static void main(String[] args) {<1
     //     Application.launch(StartScreen.class, args);
     // }   
         public static void main( String[] args ) throws IOException
