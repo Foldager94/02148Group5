@@ -197,7 +197,6 @@ public class GameClient {
         }
     }
 
-
     public void initPreFlop() {
         gameState.resetDeck();
         List<String> PeerIds = peer.getPeerIds();
@@ -247,8 +246,10 @@ public class GameClient {
     public void initShowdown(){
         Hand hand = gameCommands.getPlayerHand();
         getCurrentRoundState().incrementHandComparingCount();
-        getCurrentRoundState().setWinningHand(hand);
-        getCurrentRoundState().addWinningId(peer.id);
+        if (getCurrentRoundState().getOwnPlayerObject().getInRound()) { // only add dealers hand if they are still in
+            getCurrentRoundState().setWinningHand(hand);
+            getCurrentRoundState().addWinningId(peer.id);
+        }
         getCurrentRoundState().addToTotalHoleCards(peer.id, getCurrentRoundState().getOwnPlayerObject().getHoleCards());
         List<String> PeerIds = peer.getPeerIds();
         for(String id : PeerIds) { // send to all peers, including itself

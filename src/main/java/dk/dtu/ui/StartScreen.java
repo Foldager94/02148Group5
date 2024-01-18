@@ -28,6 +28,7 @@ import javafx.scene.text.Text;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class StartScreen extends Application {
     private ScreenSize screenSize = new ScreenSize(960, 680);
