@@ -43,7 +43,7 @@ public class LobbyScreen {
 		listView.setLayoutX(50);
 		listView.setLayoutY(150);
 
-		chat = new Chat(getChat(peer), peer);
+		chat = new Chat(getChat(peer), peer, 650);
 		chatContainer = chat.getView();
 		chatContainer.setLayoutX(50);
 		chatContainer.setLayoutY(150 + playersListView.getHeight() + 10);

@@ -19,7 +19,7 @@
 
 .error {
     -fx-text-fill: red; 
-    -fx-pref-width: 300;
+    -fx-pref-width: 500;
     -fx-font-size: 16;
     -fx-alignment: center;
     -fx-font-family: monospace;
@@ -89,12 +89,52 @@
     -fx-font-size: 14;
 }
 
-/* .list-cell:even { 
-    -fx-background-color: red;
+.small-text-center {
+    -fx-text-fill: #c1c1c0;
+    -fx-font-weight: bold;
+    -fx-font-size: 16;
+    -fx-pref-width: 200;
+    -fx-alignment: center;
 }
 
+.control-button {
+    -fx-pref-height: 40px;
+    -fx-font-size: 20;
+    -fx-text-fill: white;
+    -fx-padding: 3 6 6 6;
+    -fx-background-color: #0d5e2a;
+    -fx-min-width: 100;
+}
 
-.list-cell:odd { 
-    -fx-background-color: green;
-} */
+.control-field {
+    -fx-background-color: #262522; 
+    -fx-pref-width: 100;
+    -fx-border-color:#0d5e2a;
+    -fx-border-radius: 5;
+    -fx-font-size: 20;
+    -fx-text-fill: white; 
+}
 
+.control-button:hover {
+    -fx-background-color: #17aa4c;
+}
+
+.control-fold-button {
+    -fx-font-size: 20;
+    -fx-text-fill: white;
+    -fx-padding: 3 6 6 6;
+    -fx-background-color:#fa412d;
+    -fx-min-width: 210;
+}
+
+.control-fold-button:hover {
+    -fx-background-color:#ad2d1f;
+}
+
+.text-folded {
+    -fx-text-fill: #fa412d;
+    -fx-font-weight: bold;
+    -fx-font-size: 16;
+    -fx-pref-width: 200;
+    -fx-alignment: center;
+}

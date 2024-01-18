@@ -84,7 +84,7 @@ public class GameCommands{
                 printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 if (gameClient.getCurrentRoundState().getIsMyTurn()) {
-                    System.out.println("It is your turn to make a move");
+                    showIsYourTurn();
                 }
                 break;
             case Raise:
@@ -96,7 +96,7 @@ public class GameCommands{
                 printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() + " did a " + action.getAction() + (action.getAmount() !=0  ? " " + action.getAmount() : "" ));
                 if (gameClient.getCurrentRoundState().getIsMyTurn()) {
-                    System.out.println("It is your turn to make a move");
+                    showIsYourTurn();
                 }
                 break;
             case Check:
@@ -104,7 +104,7 @@ public class GameCommands{
                 printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 if (gameClient.getCurrentRoundState().getIsMyTurn()) {
-                    System.out.println("It is your turn to make a move");
+                    showIsYourTurn();
                 }
                 break;
             case Call:
@@ -113,12 +113,16 @@ public class GameCommands{
                 printToScreen();
                 System.out.println("Last Move: " + action.getSenderId() +" did a " + action.getAction() +(action.getAmount()!=0 ? action.getAmount():"" ));
                 if (gameClient.getCurrentRoundState().getIsMyTurn()) {
-                    System.out.println("It is your turn to make a move");
+                    showIsYourTurn();
                 }
                 break;
             default:
                 break;
         }
+    }
+
+    public void showIsYourTurn() {
+        System.out.println("It is your turn to make a move");
     }
 
     public boolean isDealer(){
@@ -144,19 +148,20 @@ public class GameCommands{
                 System.out.println("Ping From: " + connectionStatus.getSenderId());
                 String sendTo = connectionStatus.getSenderId();
                 String commandString = "ConnectionStatus";
-                String json = (new ConnectionStatus(getOwnId(), ConnectionStatusType.Pong)).toJson();
+                String json = (new ConnectionStatus(getOwnId(), ConnectionStatusType.Pong, getOwnName())).toJson();
                 sendCommand(sendTo, commandString, json);
                 break;
             case Pong:
-                addPlayerToGameState(connectionStatus.getSenderId());
+                addPlayerToGameState(connectionStatus.getSenderId(), connectionStatus.getSenderName());
                 System.out.println("Pong From: " + connectionStatus.getSenderId());
                 if(!gameClient.connectionEstablishedToAll()){ break;}
                 System.out.println("All Connections established");
                 connectionStatusResponse = new ConnectionStatus(
                     getOwnId(),
-                    ConnectionStatusType.ConnectionsEstablished
+                    ConnectionStatusType.ConnectionsEstablished,
+                    getOwnName()
                 );
-                if(getOwnId().equals(getMPId())){ 
+                if (getOwnId().equals(getMPId())) { 
                     gameClient.gameSpace.put("ConnectionStatus", connectionStatusResponse.toJson());                  
                     break; 
                 }    
@@ -169,7 +174,7 @@ public class GameCommands{
             case ConnectionsEstablished:
                 readyCount++;
                 System.out.println(connectionStatus.getSenderId() + " is Ready.");
-                if(isEveryoneReady()){
+                if (isEveryoneReady()) {
                     gameClient.startNewRound();
                 }
                 break;
@@ -296,7 +301,7 @@ public class GameCommands{
                 break;
             case PlayerTurn:
                 gameClient.getCurrentRoundState().setIsMyTurn(true);
-                System.out.println("It is your turn to make a move");
+                showIsYourTurn();
             default:
                 break;
         }
@@ -343,12 +348,16 @@ public class GameCommands{
         return gameClient.peer.id;
     }
 
+    public String getOwnName(){
+        return gameClient.peer.name;
+    }
+
     public String getMPId(){
         return gameClient.peer.MPID;
     }
 
-    public void addPlayerToGameState(String playerId){
-        gameClient.addPlayerToGameState(playerId);
+    public void addPlayerToGameState(String playerId, String pName) {
+        gameClient.addPlayerToGameState(playerId, pName);
     }
     
     public void clearScreen() {  
@@ -361,7 +370,7 @@ public class GameCommands{
     }
 
     public void printToScreen(){
-        clearScreen();
+        // clearScreen();
         System.out.println("\n");
         System.out.println("Round: " + gameClient.getCurrentRoundState().getroundId());
         System.out.println(gameClient.getCurrentRoundState().getGamePhaseType().toString());

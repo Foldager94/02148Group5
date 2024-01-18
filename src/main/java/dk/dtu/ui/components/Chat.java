@@ -24,10 +24,9 @@ public class Chat {
     private ScrollPane chatContainer = new ScrollPane();
     private int index = 0;
     private TextField messageInput = new TextField();
-    private final int WIDTH = 650;
     private Peer peer;
     
-    public Chat(ChatController chatClient, Peer peer) {
+    public Chat(ChatController chatClient, Peer peer, int WIDTH) {
         this.chatController = chatClient;
         this.peer = peer;
         container.setPrefSize(WIDTH, 300);;
@@ -38,7 +37,6 @@ public class Chat {
         chatContainer.setPadding(new Insets(2, 2, 2, 2));
         chatContainer.vvalueProperty().bind(chatBox.heightProperty());
         chatBox.getStyleClass().add("chatbox");
-
 		messageInput.setLayoutX(0);
 		messageInput.setLayoutY(205);
 
@@ -49,24 +47,35 @@ public class Chat {
 				sendMessage();
 			}
 		});
+        messageInput.setPrefWidth(WIDTH * 0.7 - 5);
+        // -fx-pref-width: 445px; 
+
+
 		Button sendMessage = new Button("Send");
-		sendMessage.setLayoutX(450);
+		sendMessage.setLayoutX(WIDTH * 0.7);
 		sendMessage.setLayoutY(205);
 		sendMessage.getStyleClass().add("send-message");
         sendMessage.setOnAction(event -> {
-
 		    sendMessage();
 		});
+        sendMessage.setPrefWidth(WIDTH * 0.3);
         container.getChildren().addAll(chatContainer, messageInput, sendMessage);
         chatClient.setChat(this);
     }
 
     public void sendMessage() {
-        chatController.sendChat(peer.name, peer.id, messageInput.getText());
+        String[] commands = messageInput.getText().split(" ");
+        if (commands.length >= 3) {
+            if (commands[0].equals("/p") && !commands[1].equals(peer.id)) {
+                chatController.sendChat(peer.name, peer.id, messageInput.getText().replace("/p " + commands[1], ""), commands[1]);
+            } else {
+                chatController.sendChat(peer.name, peer.id, messageInput.getText(), null);
+            }
+        } else {
+            chatController.sendChat(peer.name, peer.id, messageInput.getText(), null);
+        }
         messageInput.setText("");
     }
-
-
 
     public Pane getView() {
         return container;

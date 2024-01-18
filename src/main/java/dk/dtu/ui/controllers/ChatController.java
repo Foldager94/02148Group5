@@ -23,17 +23,32 @@ public class ChatController extends ChatClient {
 
     public void setChat(Chat chat) {
         this.chat = chat;
+        index = 0;
     }
 
-    public void sendChat(String sender, String senderId, String message) {
-        sendGlobalMessage(message, peer.getPeerIds());
-        addMessage(sender, senderId, message);
+    public void sendChat(String sender, String senderId, String message, String recieverId) {
+        if (recieverId == null) {
+            sendGlobalMessage(message, peer.getPeerIds());
+        } else {
+            sendMessage(message, recieverId, false);
+        }
+        addMessage("You", senderId, message, recieverId);
     }
 
-    public void addMessage(String senderName, String senderId, String message) {
+    public void addMessage(String senderName, String senderId, String message, String recieverId) {
         Platform.runLater(() -> {
+            System.out.println(recieverId);
             if (isNotEmpty(message)) {
-                Label label = new Label("> " + senderName + ": "  + message);
+                Label label;
+                if (recieverId != null) {
+                    if (senderName.equals("You")) {
+                        label = new Label("> You =>" + recieverId + ": "  + message);
+                    } else {
+                        label = new Label("> " + senderName + " => You: "  + message);
+                    }
+                } else {
+                    label = new Label("> " + senderName + ": "  + message);
+                }
                 label.getStyleClass().add("chat-message");
                 chat.messages.add(label);
                 chat.chatBox.getChildren().add(chat.messages.get(index));
@@ -48,7 +63,7 @@ public class ChatController extends ChatClient {
 
     @Override
     public void showChat(String privateOrPublic, String senderName, String senderId, String message) {
-        addMessage(senderName, senderId, message);
+        addMessage(senderName, senderId, message, (privateOrPublic.equals("Global") ? null : "Abc"));
     }
 
     public String getName() {

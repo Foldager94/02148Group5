@@ -15,6 +15,7 @@ public class GameState {
     Deck deck = new Deck();
     List<RoundState> history;
     RoundState currentRoundState;
+
     public void createNewRoundState(String peerId) {
         updateRound();
         String dealer = getNewDealer();
@@ -24,6 +25,7 @@ public class GameState {
         RoundState roundState = new RoundState(roundId, peerId, players, smallBlind, bigBlind, dealer, firstPlayer);
         currentRoundState = roundState;
     }
+    
     public void assignRoles() {
         if (players.size() >= 3) {
             // players.get(round % players.size()).assignDealer();
@@ -42,9 +44,9 @@ public class GameState {
             int indexOfPreviuseDealer = findPlayerIndexById(previuseDealer);
             int nextIndex = indexOfPreviuseDealer+1;
             if(nextIndex < players.size()){
-                return players.get(nextIndex).id;
+                return players.get(nextIndex).getId();
             }
-            return players.get(0).id;
+            return players.get(0).getId();
 
         }
     }
@@ -53,27 +55,27 @@ public class GameState {
         int dealerint= Integer.parseInt(dealer);
         int nextIndex = dealerint+1;
             if(nextIndex < players.size()){
-                return players.get(nextIndex).id;
+                return players.get(nextIndex).getId();
             }
-            return players.get(0).id;
+            return players.get(0).getId();
     }
 
     public String getNewBigBlind(String smallBlind) {
         int smallBlindint= Integer.parseInt(smallBlind);
         int nextIndex = smallBlindint+1;
         if(nextIndex < players.size()){
-            return players.get(nextIndex).id;
+            return players.get(nextIndex).getId();
         }
-        return players.get(0).id;
+        return players.get(0).getId();
     }
     
     public String getNewFirstPlayer(String bigBlind) {
         int bigBlindint = Integer.parseInt(bigBlind);
         int nextIndex = bigBlindint + 1;
         if(nextIndex < players.size()){
-            return players.get(nextIndex).id;
+            return players.get(nextIndex).getId();
         }
-        return players.get(0).id;
+        return players.get(0).getId();
     }
 
 

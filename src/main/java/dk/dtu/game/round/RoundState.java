@@ -225,17 +225,17 @@ public class RoundState {
         int smallBlindint= Integer.parseInt(playerId);
         int nextIndex = smallBlindint + 1;
         if(nextIndex < players.size()){
-            return players.get(nextIndex).id;
+            return players.get(nextIndex).getId();
         }
-        return players.get(0).id;
+        return players.get(0).getId();
     }
 
     public void calculateBlindsBet() {
         calculateBlinds();
         Player SB = getPlayer(smallBlind);
         Player BB = getPlayer(bigBlind);
-        bets.set(Integer.parseInt(SB.id),smallBlindPrice);
-        bets.set(Integer.parseInt(BB.id),bigBlindPrice);
+        bets.set(Integer.parseInt(SB.getId()),smallBlindPrice);
+        bets.set(Integer.parseInt(BB.getId()),bigBlindPrice);
         pot = smallBlindPrice + bigBlindPrice;
         SB.removeFromBalance(smallBlindPrice);
         BB.removeFromBalance(bigBlindPrice);

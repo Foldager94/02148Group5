@@ -46,12 +46,11 @@ public class StartScreen extends Application {
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
 
-
         errorText = new Label("");
         errorText.setLayoutY(screenSize.getHeight() / 2 + 100);
         errorText.getStyleClass().add("error");
 
-        startController = new StartController(screenSize, errorText);
+        startController = new StartController(primaryStage, screenSize, errorText);
 
         Button joinButton = new Button("Join lobby");
         Button createButton = new Button("Create lobby");
@@ -61,11 +60,11 @@ public class StartScreen extends Application {
         createButton.getStyleClass().add("main-button");
 
 		joinButton.setOnAction(event -> {
-		    startController.joinLobby(username.getText(), primaryStage);;
+		    startController.joinLobby(username.getText());;
 		});
 
         createButton.setOnAction(event -> {
-		    startController.createLobby(username.getText(), primaryStage);;
+		    startController.createLobby(username.getText());;
 		});
 
         username = new TextField();
@@ -88,7 +87,7 @@ public class StartScreen extends Application {
         scene = new Scene(root, screenSize.getWidth(), screenSize.getHeight());
         startController.addCss("src\\resources\\main.css", scene);
         File icon = new File("src\\resources\\images\\king.png");
-
+        primaryStage.setTitle("Poker Group 5");
         primaryStage.getIcons().add(new Image(icon.getAbsolutePath().replace("\\", "/")));
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);

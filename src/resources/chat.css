@@ -12,12 +12,10 @@
   
 .send-message {
    -fx-pref-height: 40px;
-   -fx-pref-width: 200px;
    -fx-font-size: 20;
    -fx-text-fill: white;
    -fx-padding: 3 6 6 6;
    -fx-background-color: #0d5e2a;
-   -fx-min-width: 200;
 }
 
 .send-message:hover {
@@ -25,7 +23,6 @@
 }
 
 .message-field {
-    -fx-pref-width: 445px; 
     -fx-pref-height: 40px; 
     -fx-font-size: 18;
     -fx-background-color: #262522; 

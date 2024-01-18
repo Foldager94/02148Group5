@@ -30,7 +30,6 @@ public class CreateLobbyScreen extends LobbyScreen {
     }
 
     public void startGame() {
-        System.out.println("Starting game!!!!!!!!!!!!");
         getChat(getPeer()).sendGlobalMessage("StartGame", getPeer().getPeerIds());
         getPeer().game.initGame();
     }

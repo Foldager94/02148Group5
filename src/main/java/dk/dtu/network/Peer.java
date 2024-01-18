@@ -273,9 +273,11 @@ public class Peer {
             case "/g":
                 // /g Check, /g Fold, /g raise <amount> /g call <amount>
                 //Game handler
-                game.gameCommandHandler(command);
+                String res = game.gameCommandHandler(command);
+                if (res != null) {
+                    System.out.println(res);
+                }
                 break;
-
             default:
                 System.err.println("Unknown command.");
                 System.err.println("/p for private message");

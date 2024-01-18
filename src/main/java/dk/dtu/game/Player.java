@@ -4,17 +4,23 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Player {
-    public String id;
+    private String id;
+    private String name;
     int balance;
     boolean inGame;
     boolean inRound;
     List<Card> holeCards = new ArrayList<Card>(2);
 
-    public Player(String id, int balance) {
+    public Player(String id, int balance, String name) {
         this.id = id;
         this.balance = balance;
         this.inGame = true;
         this.inRound = true;
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
 

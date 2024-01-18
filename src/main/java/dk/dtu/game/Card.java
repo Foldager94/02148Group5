@@ -28,11 +28,10 @@ public class Card implements Comparable<Card> {
     }
 
     public String getImageUrl() {
-        return String.valueOf(value) + "_of_" + suit + ".png";
+        return ((this.value > 10) ? toString().replaceAll(" ", "_") : (String.valueOf(value) + "_of_" + suit)) + ".png";
     }
-    
         
-     public String toString() {
+    public String toString() {
         String valueStr;
         switch (this.value) {
             case 2: valueStr = "Two";

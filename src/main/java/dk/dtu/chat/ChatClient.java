@@ -35,8 +35,6 @@ public class ChatClient {
                     ));
                     String senderId = messageTuple.getElementAt(String.class, 0); // its id
 
-
-
                    if(!peer.isPeerKnown(senderId)){
                        sendMessage("IntroduceYourSelf", senderId, false);
                        continue;

@@ -28,8 +28,8 @@ public class PlayersListView {
         listView.getStyleClass().add("list-view");
     }
 
-    public void addName(String name) {
-        myObservableList.add(new HBoxCell(name, host));
+    public void addName(String name, String id) {
+        myObservableList.add(new HBoxCell(name, id));
     }
     
     public int getHeight() {
@@ -39,5 +39,4 @@ public class PlayersListView {
     public ListView<HBoxCell> getView() {
         return listView;
     }
-
 }

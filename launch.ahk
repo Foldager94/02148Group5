@@ -1,3 +1,21 @@
-SetKeyDelay, 200
-^+k::Send {Up}{Enter}mp{enter}h{enter}{Sleep, 50}{AltDown}{down}{AltUp}{up}{enter}p1{enter}j{enter}9001{enter}{Sleep, 50}{AltDown}{down}{AltUp}{up}{enter}p2{enter}j{enter}9002{enter}{Sleep, 50}{AltDown}{down}{AltUp}{up}{enter}p3{enter}j{enter}9003{enter}
-^+k::Send {Up}{Enter}mp{enter}h{enter}{Sleep, 50}{AltDown}{down}{AltUp}{up}{enter}p1{enter}j{enter}9001{enter}{Sleep, 50}{AltDown}{down}{AltUp}{up}{enter}p2{enter}j{enter}9002{enter}{Sleep, 50}{AltDown}{down}{AltUp}{up}{enter}p3{enter}j{enter}9003{enter}
+SetKeyDelay, 70
+^+j::Send {CtrlDown}c{CtrlUp}{AltDown}{Down}{AltUp}{CtrlDown}c{CtrlUp}{AltDown}{Down}{AltUp}{CtrlDown}c{CtrlUp}{AltDown}{Down}{AltUp}{CtrlDown}c{CtrlUp}
+^+l::
+    Send {Up}{Enter}
+    Sleep 500
+    activeWindow := WinActive("A")
+    WinMove, ahk_id %activeWindow%, , 0, 200, 960, 680
+    Send {Tab}{Tab}Alice{Tab}{Tab}{Enter}{AltDown}{Tab}{AltUp}{AltDown}{Down}{AltUp}{Up}{Enter}
+    Sleep 500
+    activeWindow := WinActive("A")
+    WinMove, ahk_id %activeWindow%, , 960, 200,, 
+    Send {Tab}{Tab}Bob{Tab}{Enter}{AltDown}{Tab}{AltUp}{AltDown}{Down}{AltUp}{Up}{Enter}
+    Sleep 500
+    activeWindow := WinActive("A")
+    WinMove, ahk_id %activeWindow%, , 1920, 200,, 
+    Send {Tab}{Tab}Charlie{Tab}{Enter}{AltDown}{Tab}{AltUp}{AltDown}{Down}{AltUp}{Up}{Enter}
+    Sleep 500
+    activeWindow := WinActive("A")
+    WinMove, ahk_id %activeWindow%, , 2880, 200,, 
+    Send {Tab}{Tab}Dave{Tab}{Enter}{AltDown}{Tab}{Tab}{Tab}{AltUp}{AltDown}{Tab}{Tab}{Tab}{Tab}{AltUp}
+    return

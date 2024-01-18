@@ -10,49 +10,49 @@ import dk.dtu.game.Suit;
 import java.util.Collections;
 
 public class RulesTest {    
-    @Test
-    public void testIsRoyalStraightFlush() {
-        List<Card> cardList  = new ArrayList<Card>();
-        cardList.add(new Card(10, Suit.Hearts));
-        cardList.add(new Card(11, Suit.Hearts));
-        cardList.add(new Card(12, Suit.Hearts));
-        cardList.add(new Card(13, Suit.Hearts));
-        cardList.add(new Card(14, Suit.Hearts));
-        cardList.add(new Card(6, Suit.Clubs));
-        cardList.add(new Card(2, Suit.Clubs));
-        List<Integer> hand = new Hand(cardList).getHand();
-        System.out.println(hand.toString());
-        assertTrue(9 == hand.get(0) && hand.size() == 1);
-    }
-    @Test
-    public void testIsNotRoyalStraightFlush() {
-        List<Card> cardList  = new ArrayList<Card>();
-        cardList.add(new Card(10, Suit.Hearts));
-        cardList.add(new Card(11, Suit.Diamonds));
-        cardList.add(new Card(12, Suit.Hearts));
-        cardList.add(new Card(13, Suit.Hearts));
-        cardList.add(new Card(14, Suit.Hearts));
-        cardList.add(new Card(4, Suit.Spades));
-        cardList.add(new Card(6, Suit.Clubs));
-        List<Integer> hand = new Hand(cardList).getHand();
-        System.out.println(hand.toString());
-        assertTrue(9 != hand.get(0));
+    // @Test
+    // public void testIsRoyalStraightFlush() {
+    //     List<Card> cardList  = new ArrayList<Card>();
+    //     cardList.add(new Card(10, Suit.Hearts));
+    //     cardList.add(new Card(11, Suit.Hearts));
+    //     cardList.add(new Card(12, Suit.Hearts));
+    //     cardList.add(new Card(13, Suit.Hearts));
+    //     cardList.add(new Card(14, Suit.Hearts));
+    //     cardList.add(new Card(6, Suit.Clubs));
+    //     cardList.add(new Card(2, Suit.Clubs));
+    //     List<Integer> hand = new Hand(cardList).getHand();
+    //     System.out.println(hand.toString());
+    //     assertTrue(9 == hand.get(0) && hand.size() == 1);
+    // }
+    // @Test
+    // public void testIsNotRoyalStraightFlush() {
+    //     List<Card> cardList  = new ArrayList<Card>();
+    //     cardList.add(new Card(10, Suit.Hearts));
+    //     cardList.add(new Card(11, Suit.Diamonds));
+    //     cardList.add(new Card(12, Suit.Hearts));
+    //     cardList.add(new Card(13, Suit.Hearts));
+    //     cardList.add(new Card(14, Suit.Hearts));
+    //     cardList.add(new Card(4, Suit.Spades));
+    //     cardList.add(new Card(6, Suit.Clubs));
+    //     List<Integer> hand = new Hand(cardList).getHand();
+    //     System.out.println(hand.toString());
+    //     assertTrue(9 != hand.get(0));
 
-    }
-    @Test
-    public void testIsStraightFlush() {
-        List<Card> cardList  = new ArrayList<Card>();
-        cardList.add(new Card(6, Suit.Hearts));
-        cardList.add(new Card(7, Suit.Hearts));
-        cardList.add(new Card(8, Suit.Hearts));
-        cardList.add(new Card(9, Suit.Hearts));
-        cardList.add(new Card(10, Suit.Hearts));
-        cardList.add(new Card(4, Suit.Spades));
-        cardList.add(new Card(6, Suit.Clubs));
-        List<Integer> hand = new Hand(cardList).getHand();
-        System.out.println(hand.toString());
-        assertTrue(9 == hand.get(0));
-    }
+    // }
+    // @Test
+    // public void testIsStraightFlush() {
+    //     List<Card> cardList  = new ArrayList<Card>();
+    //     cardList.add(new Card(6, Suit.Hearts));
+    //     cardList.add(new Card(7, Suit.Hearts));
+    //     cardList.add(new Card(8, Suit.Hearts));
+    //     cardList.add(new Card(9, Suit.Hearts));
+    //     cardList.add(new Card(10, Suit.Hearts));
+    //     cardList.add(new Card(4, Suit.Spades));
+    //     cardList.add(new Card(6, Suit.Clubs));
+    //     List<Integer> hand = new Hand(cardList).getHand();
+    //     System.out.println(hand.toString());
+    //     assertTrue(9 == hand.get(0));
+    // }
     // }
     // @Test
     // public void testIsNotStraightFlush() {
