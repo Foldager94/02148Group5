@@ -76,7 +76,6 @@ public class StartScreen extends Application {
         header.getStyleClass().add("header");
         header.setLayoutY(screenSize.getHeight() / 2 - 140);
 
-
         root.getChildren().add(header);
         root.getChildren().add(joinButton);
         root.getChildren().add(createButton);
