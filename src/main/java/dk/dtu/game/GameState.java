@@ -17,6 +17,9 @@ public class GameState {
     RoundState currentRoundState;
 
     public void createNewRoundState(String peerId) {
+        if(currentRoundState != null){
+            addRoundStateToHistory();
+        }
         updateRound();
         String dealer = getNewDealer();
         String smallBlind = getNewSmallBlind(dealer);
@@ -25,16 +28,6 @@ public class GameState {
         RoundState roundState = new RoundState(roundId, peerId, players, smallBlind, bigBlind, dealer, firstPlayer);
         currentRoundState = roundState;
     }
-    
-    public void assignRoles() {
-        if (players.size() >= 3) {
-            // players.get(round % players.size()).assignDealer();
-            // players.get((round - 1) % players.size()).assignSmallBlind();
-            // players.get((round - 2) % players.size()).bigBlind();
-        } else {
-        }
-    }
-
 
     public String getNewDealer(){
         if(currentRoundState == null){
@@ -95,36 +88,15 @@ public class GameState {
 
     public void addRoundStateToHistory(){
         if (currentRoundState != null) {
-            history.add(currentRoundState);
+            history = new ArrayList<>();
         }
+        history.add(currentRoundState);
     }
-    
-    public void initNewRoundState() {
-        //currentRoundState = new RoundState();
-    }
-
-    public void updatePlayerList() {
-        players = currentRoundState.getPlayers();
-    }
-    
-    public void updateGameState() {
-        //TODO: update the gameState after round is finished
-        updateRound();
-        resetDeck();
-        removeLosingPlayers();
-    }
-    
-    public void removeLosingPlayers(){
-        if (players != null) {
-            players.removeIf(player -> player.getBalance() <= 0);         
-        }
-    }
-
 
 
     public void addPlayer(Player player) {
         if (players == null) {
-            players = new ArrayList<Player>();
+            players = new ArrayList<>();
         }
         players.add(player);
         Collections.sort(players, new Comparator<Player>() {

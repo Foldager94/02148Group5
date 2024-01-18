@@ -9,7 +9,7 @@ public class Deck {
     private static int usedCards = 0; // keep track of how many of the cards have been used
 
     public Deck() {
-        cards = new ArrayList<Card>();
+        cards = new ArrayList<>();
         for (Suit suit : Suit.values()) {
             for (int val = 2; val < 15; val++) {
                 cards.add(new Card(val, suit));
@@ -27,10 +27,6 @@ public class Deck {
         List<Card> drawnCards = cards.subList(cards.size()-nCards-usedCards, cards.size()-usedCards);
         usedCards += nCards;
         return drawnCards;
-    }
-
-    public int getRemainingDeckSize() {
-        return 52 - usedCards;
     }
 
 }

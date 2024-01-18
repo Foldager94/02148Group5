@@ -1,18 +1,22 @@
 package dk.dtu.chat;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
 import org.jspace.SequentialSpace;
 import org.jspace.Space;
 import org.jspace.SpaceRepository;
 import org.jspace.Tuple;
-import dk.dtu.network.Peer;
+
+import java.util.Arrays;
+import java.util.List;
+
 import java.io.IOException;
+
+import dk.dtu.network.Peer;
+
 public class ChatClient {
+    private final String GLOBAL = "Global";
+    private final String PRIVATE = "Private";
     
     public SequentialSpace chat;
     public SpaceRepository chats;
@@ -59,7 +63,7 @@ public class ChatClient {
                     }
 
                     String senderName = peer.getPeerName(senderId);
-                    String privateOrPublic = messageTuple.getElementAt(Boolean.class, 2) ? "Global" : "Private";
+                    String privateOrPublic = messageTuple.getElementAt(Boolean.class, 2) ? GLOBAL : PRIVATE;
                     showChat(privateOrPublic, senderName, senderId, message);
                 } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
@@ -84,29 +88,6 @@ public class ChatClient {
         }
     }
 
-//    public void startMessageReceiver() {
-//        new Thread(() -> {
-//            while (true) {
-//                try {
-//                    Object[] messageTuple = chat.get(
-//                            new FormalField(String.class), // sender id
-//                            new FormalField(String.class), // message
-//                            new FormalField(Boolean.class) // isAllChat
-//                    );
-//                    String senderId = (String) messageTuple[0]; // its id
-//                    String senderName = peer.getPeerName(senderId);
-//                    String message = (String) messageTuple[1];
-//                    String privateOrPublic = (Boolean) messageTuple[2] ? "Global" : "Private";
-//                    System.out.println(privateOrPublic + " "+ senderName + "#"+ senderId + ": " + message);
-//                } catch (InterruptedException e) {
-//                    System.out.println(e.getMessage());
-//                    Thread.currentThread().interrupt();
-//
-//                    return;
-//                }
-//            }
-//        }).start();
-//    }
     
     public void sendMessage(String message, String ReceiverID, Boolean isAllChat) {
         try {

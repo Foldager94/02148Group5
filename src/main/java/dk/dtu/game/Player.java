@@ -52,9 +52,6 @@ public class Player {
     public List<Card> getHoleCards() {
         return this.holeCards;
     }
-    public boolean isInGame() {
-      return this.balance> 0 ? true: false;
-    }
     public void setInRound(boolean val){
         this.inRound = val;
     }

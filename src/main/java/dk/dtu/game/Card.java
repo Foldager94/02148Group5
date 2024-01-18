@@ -3,8 +3,8 @@ package dk.dtu.game;
 // card images from https://opengameart.org/content/playing-cards-vector-png
 
 public class Card implements Comparable<Card> {
-    private int value;
-    private Suit suit;
+    private final int value;
+    private final Suit suit;
 
     public Card(int value, Suit suit) {
         this.value = value;
@@ -15,17 +15,10 @@ public class Card implements Comparable<Card> {
         return value;
     }
 
-    public void setValue(int value) {
-        this.value = value;
-    }
-
     public Suit getSuit(){
         return suit;
     }
 
-    public void setSuit(Suit suit) {
-        this.suit = suit;
-    }
 
     public String getImageUrl() {
         return ((this.value > 10) ? toString().replaceAll(" ", "_") : (String.valueOf(value) + "_of_" + suit)) + ".png";
