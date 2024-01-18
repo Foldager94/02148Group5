@@ -94,9 +94,12 @@ public class GameScreen {
 	}
 
 	public void setIsYourTurn() {
+		System.out.println("It is you turn");
 		isYourTurn = true;
 		Platform.runLater(() -> {
-			root.getChildren().add(gameButtons);
+			if (!root.getChildren().contains(gameButtons)) {
+				root.getChildren().add(gameButtons);
+			}
 		});
 	}
 

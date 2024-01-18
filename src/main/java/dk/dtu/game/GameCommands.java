@@ -72,7 +72,7 @@ public class GameCommands{
                 }
                 printToScreen();
                 printAction(action);
-                showIsYourTurn();
+                // showIsYourTurn();
                 break;
             case Raise:
                 gameClient.getCurrentRoundState().calcPlayerRaise(action.getSenderId(), action.getAmount());
@@ -80,20 +80,20 @@ public class GameCommands{
                 gameClient.sendPlayerTurnCommand(action.getSenderId());
                 printToScreen();
                 printAction(action);
-                showIsYourTurn();
+                // showIsYourTurn();
                 break;
             case Check:
                 dealerPickNextPlayerOrNewPhase(action.getSenderId());
                 printToScreen();
                 printAction(action);
-                showIsYourTurn();
+                // showIsYourTurn();
                 break;
             case Call:
                 gameClient.getCurrentRoundState().calcPlayerCall(action.getSenderId());
                 dealerPickNextPlayerOrNewPhase(action.getSenderId());
                 printToScreen();
                 printAction(action);
-                showIsYourTurn();
+                // showIsYourTurn();
                 break;
             default:
                 break;
