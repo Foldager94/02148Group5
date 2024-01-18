@@ -23,6 +23,10 @@ public class Deck {
 		Collections.shuffle(cards);
     }
 
+    public List<Card> getCardsByIndex(int index) {
+        return cards.subList(cards.size() - (2 * (index + 1)), cards.size() - (2 * index));
+    }
+
     public List<Card> draw(int nCards) {
         List<Card> drawnCards = cards.subList(cards.size()-nCards-usedCards, cards.size()-usedCards);
         usedCards += nCards;

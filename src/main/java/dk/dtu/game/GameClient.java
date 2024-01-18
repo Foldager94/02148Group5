@@ -272,16 +272,25 @@ public class GameClient {
         if(winningId != null) { // if the player is the last player who haven't folded
             if (peer.id.equals(getCurrentRoundState().getDealer())) {
                 System.out.println("Last player, end the game!");
-                System.out.println("Last player, end the game!");
-                try {
-                    getCurrentRoundState().addWinningId(winningId);
-                    RoundStatus rs = new RoundStatus(peer.id, RoundStatusType.RoundEnded, getCurrentRoundState().getWinningIds());
-                    sendGlobalCommand(peer.getPeerIds(), ROUND_STATUS, rs.toJson());
-                    gameSpace.put(ROUND_STATUS, rs.toJson());
-                } catch (InterruptedException e) {
-                    System.err.println("Error: makeFoldAction");
-                    e.printStackTrace();
+                List<Card> winningCards = gameState.deck.getCardsByIndex(gameState.findPlayerIndexById(winningId));
+                getCurrentRoundState().addToTotalHoleCards(winningId, winningCards);
+                GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.Result, null, getCurrentRoundState().getTotalHoleCards(), getCurrentRoundState().getWinningIds());
+                for(String id : peer.getPeerIds()) { // send to all peers, including itself
+                    sendCommand(id, "GamePhase", gpCommand.toJson());
                 }
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(5000); // wait 5 seconds before resetting round
+                        RoundStatus rs = new RoundStatus(peer.id, RoundStatusType.RoundEnded, getCurrentRoundState().getWinningIds());
+                        sendGlobalCommand(peer.getPeerIds(), "RoundStatus", rs.toJson());
+                        try { // Send new round status update to dealer
+                            gameSpace.put("RoundStatus", rs.toJson());
+                        } catch (InterruptedException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    } catch (Exception e) {}
+                }).start();
             }
         }
         return null;

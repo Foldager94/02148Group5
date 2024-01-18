@@ -25,14 +25,10 @@ public class GamePlayer {
         Label name = new Label(isYou ? "You" : (player.getName() + "#" + player.getId()));
         name.setLayoutY(20);
         name.getStyleClass().add("small-text-center");
-        // if (winningIds != null && winningIds.contains(player.getId())) {
-        //     System.out.println("You won!!!");
-        // }
         if (winningIds != null) {
             for (String id : winningIds) {
                 if (id.equals(player.getId())) {
                     name.getStyleClass().add("winner");
-                    System.out.println("You won!!!");
                 }
             }
         }

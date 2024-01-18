@@ -51,12 +51,15 @@ public class GameCommands{
                     gameClient.getCurrentRoundState().setNewFirstPlayer(action.getSenderId());
                 }
                 if (gameClient.isLastPlayer(action.getSenderId())) {
-                    gameClient.getCurrentRoundState().updateLastPlayer();
                     updateLast = true;
+                    if (gameClient.getCurrentRoundState().getOrigLastPlayer().equals(action.getSenderId())) { // if the actual last
+                        gameClient.getCurrentRoundState().updateLastPlayer();
+                    }
                 }
                 String winningId = gameClient.isOnlyOnePlayer();
                 if (winningId != null) { 
-                    // Have not looked at this part yet.
+                    List<Card> winningCards = gameClient.gameState.deck.getCardsByIndex(gameClient.gameState.findPlayerIndexById(winningId));
+                    gameClient.getCurrentRoundState().addToTotalHoleCards(winningId, winningCards);
                     sendRoundResults(winningId);
                 } else { // game is not over
                     if (isDealer()) { // if delear
@@ -298,7 +301,7 @@ public class GameCommands{
             }
             new Thread(() -> {
                 try {
-                    Thread.sleep(4000); // wait 8 seconds before resetting round
+                    Thread.sleep(4000); // wait 4 seconds before resetting round
                     sendRoundEndedCommand();
                 } catch (Exception e) {
                 }
