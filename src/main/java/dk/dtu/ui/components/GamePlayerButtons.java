@@ -37,6 +37,11 @@ public class GamePlayerButtons {
         raiseBtn.getStyleClass().add("control-button");
         raiseBtn.setOnAction(event -> {
             String raiseAmount = raiseField.getText();
+            int amount = Integer.valueOf(raiseAmount);
+            if (amount <= 0) {
+                gameScreen.showError("Raise must be positive");
+                return;
+            }
             if (!raiseAmount.strip().isEmpty()) {
                 String res = gameClient.gameCommandHandler("/g Raise " + raiseField.getText());
                 if (res != null) gameScreen.showError(res);

@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 
 public class Hand implements Comparable<Hand> {
     private List<Card> cards;
+    private List<Card> holeCards;
     private List<Integer> hand;
     private String id;
 
@@ -22,12 +23,17 @@ public class Hand implements Comparable<Hand> {
     }
 
     public Hand(List<Card> communityCards, List<Card> holeCards, String id)  {
+        this.holeCards = holeCards;
         this.id = id;
         cards = new ArrayList<>();
         cards.addAll(communityCards);
         cards.addAll(holeCards);
         Collections.sort(cards);
         hand = determineHand(cards);
+    }
+
+    public List<Card> getHoleCards() {
+        return holeCards;
     }
 
     public List<Integer> determineHand(List<Card> cards) {

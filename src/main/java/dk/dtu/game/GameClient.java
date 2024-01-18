@@ -181,7 +181,6 @@ public class GameClient {
             case River:
                 getCurrentRoundState().setGamePhaseType(GamePhaseType.Showdown);
                 return GamePhaseType.Showdown;
-
         }
         return null;
     }
@@ -216,7 +215,6 @@ public class GameClient {
         String bigBlindId = getCurrentRoundState().getBigBlind();
         sendPlayerTurnCommand(bigBlindId);
         // Send command to player that have to do the first action
-
     }
 
     public void initFlop(){
@@ -261,6 +259,7 @@ public class GameClient {
         getCurrentRoundState().incrementHandComparingCount();
         getCurrentRoundState().setWinningHand(hand);
         getCurrentRoundState().addWinningId(peer.id);
+        getCurrentRoundState().addToTotalHoleCards(peer.id, getCurrentRoundState().getOwnPlayerObject().getHoleCards());
         List<String> PeerIds = peer.getPeerIds();
         for(String id : PeerIds) { // send to all peers, including itself
             GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.Showdown, new ArrayList<Card>());
@@ -286,7 +285,7 @@ public class GameClient {
                 System.out.println("Last player, end the game!");
                 try {
                     getCurrentRoundState().addWinningId(winningId);
-                    RoundStatus rs = new RoundStatus(peer.id, RoundStatusType.RoundEnded, getCurrentRoundState().getWinningId());
+                    RoundStatus rs = new RoundStatus(peer.id, RoundStatusType.RoundEnded, getCurrentRoundState().getWinningIds());
                     sendGlobalCommand(peer.getPeerIds(), "RoundStatus", rs.toJson());
                     gameSpace.put("RoundStatus", rs.toJson());
                 } catch (InterruptedException e) {

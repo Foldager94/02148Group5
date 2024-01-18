@@ -42,7 +42,6 @@ public class GameClientController extends GameClient {
 
     @Override
     public void printToScreen(String gamePhase) {
-        System.out.println("Updatting graphics from the client view");
         Platform.runLater(() -> {
             gameScreen.makeGraphics();
         });

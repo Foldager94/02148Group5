@@ -4,7 +4,10 @@ import dk.dtu.game.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import dk.dtu.game.Card;
 import dk.dtu.game.Hand;
 import dk.dtu.game.commands.enums.GamePhaseType;
@@ -31,6 +34,7 @@ public class RoundState {
     private GamePhaseType gamePhaseType = null;
     boolean isMyTurn = false;
     private Hand winningHand = null;
+    private Map<String, List<Card>> totalHoleCards = new HashMap<>();
     private List<String> winningIds = new ArrayList<>();
     private int handComparingCount = 0;
     
@@ -52,6 +56,22 @@ public class RoundState {
             bets.add(0);
         }
         setAllPlayersInRound();
+    }
+
+    public void addToTotalHoleCards(String id, List<Card> holeCards) {
+        totalHoleCards.put(id, holeCards);
+    }
+
+    public void setTotalHoleCards(Map<String, List<Card>> totalHoleCards) {
+        this.totalHoleCards = totalHoleCards;
+    }
+
+    public void setWinningIds(List<String> ids) {
+        this.winningIds = ids;
+    }
+
+    public Map<String, List<Card>> getTotalHoleCards() {
+        return totalHoleCards;
     }
 
     public void setAllPlayersInRound(){
@@ -93,7 +113,7 @@ public class RoundState {
         winningIds.add(id);
     }
 
-    public List<String> getWinningId() {
+    public List<String> getWinningIds() {
         return winningIds;
     }
     
@@ -177,6 +197,7 @@ public class RoundState {
     }
 
     public void updateLastPlayer() {
+        System.out.println("Prev last player:  " + lastPlayer);
         this.lastPlayer = getNonFoldedPlayerBefore(this.lastPlayer);
         System.out.println("New last player: " + lastPlayer);
         this.ORIG_LAST_PLAYER = this.lastPlayer;

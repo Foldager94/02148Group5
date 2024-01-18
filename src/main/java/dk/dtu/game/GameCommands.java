@@ -8,6 +8,7 @@ import dk.dtu.game.commands.enums.RoundStatusType;
 import dk.dtu.game.commands.ConnectionStatus;
 import dk.dtu.game.commands.RoundStatus;
 import dk.dtu.game.round.RoundState;
+import javafx.concurrent.Task;
 import dk.dtu.game.commands.GamePhase;
 import dk.dtu.game.commands.SyncState;
 
@@ -39,8 +40,6 @@ public class GameCommands{
         }
     }
 
-
-
     // function to hande an incoming action from another player
     public void actionCommand(String jsonObject){
         Action action = Action.fromJson(jsonObject);
@@ -61,15 +60,24 @@ public class GameCommands{
                 if (winningId != null) { 
                     // Have not looked at this part yet.
                     if (isDealer()) {
-                        gameClient.getCurrentRoundState().addWinningId(winningId);
-                        RoundStatus rs = new RoundStatus(getOwnId(), RoundStatusType.RoundEnded, gameClient.getCurrentRoundState().getWinningId());
-                        gameClient.sendGlobalCommand(gameClient.peer.getPeerIds(), "RoundStatus", rs.toJson());
-                        try {
-                            gameClient.gameSpace.put("RoundStatus", rs.toJson());
-                        } catch (InterruptedException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                        gameClient.getCurrentRoundState().addWinningId(winningId); // cannot get the cards of the winner, but who cares
+                        GamePhase gpCommand = new GamePhase(getOwnId(), GamePhaseType.Result, null, gameClient.getCurrentRoundState().getTotalHoleCards(), gameClient.getCurrentRoundState().getWinningIds());
+                        for(String id : gameClient.peer.getPeerIds()) { // send to all peers, including itself
+                            sendCommand(id, "GamePhase", gpCommand.toJson());
                         }
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(4000); // wait 8 seconds before resetting round
+                                RoundStatus rs = new RoundStatus(getOwnId(), RoundStatusType.RoundEnded, gameClient.getCurrentRoundState().getWinningIds());
+                                gameClient.sendGlobalCommand(gameClient.peer.getPeerIds(), "RoundStatus", rs.toJson());
+                                try { // Send new round status update to dealer
+                                    gameClient.gameSpace.put("RoundStatus", rs.toJson());
+                                } catch (InterruptedException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                }
+                            } catch (Exception e) {}
+                        }).start();
                     }
                 } else { // game is not over
                     if (isDealer()) { // if delear
@@ -211,19 +219,22 @@ public class GameCommands{
                 addCardsToCommunityCards(gamePhase.getCards());
                 gameClient.getCurrentRoundState().setLastRaise(null);
                 printToScreen();
-                System.out.println();
                 break;
             case Showdown:
                 setGamePhaseType(GamePhaseType.Showdown);
-                printToScreen();
                 System.out.println("We are in showdown");
                 if(!getOwnId().equals(getMPId())){ 
                     Hand hand = getPlayerHand();
                     gameClient.sendCommand(getDealerId(), "DeterminHand", hand.toJson());
                 }
+                break;
+            case Result:
+                gameClient.getCurrentRoundState().setTotalHoleCards(gamePhase.getTotalHoleCards()); 
+                gameClient.getCurrentRoundState().setWinningIds(gamePhase.getWinningIds());
+                printToScreen();
+                break;
             default:
                 break;
-                
         }
     }
 
@@ -232,26 +243,44 @@ public class GameCommands{
         Hand peerHand = Hand.fromJson(jsonObject);
         System.out.println("Delear recieved hand: " + peerHand.getHand().toString());
         Hand winningHand = gameClient.getCurrentRoundState().getWinningHand(); // assume not null, since dealer sets first
-        if (peerHand.compareTo(winningHand) > 0) {
-            gameClient.getCurrentRoundState().setWinningHand(peerHand);
-            gameClient.getCurrentRoundState().setWinningId(peerHand.getId());
-            System.out.println("New winning hand, maybe");
-        } else if (peerHand.compareTo(winningHand) == 0) {
-            System.out.println("Tie, between two of the hands");
-            gameClient.getCurrentRoundState().addWinningId(peerHand.getId());
-        } else {
-            System.out.println("Worse hand");
-        }
-        gameClient.getCurrentRoundState().incrementHandComparingCount();
-        if(gameClient.getCurrentRoundState().getHandComparingCount() == gameClient.getCurrentRoundState().getPlayers().size()){
-            RoundStatus rs = new RoundStatus(getOwnId(), RoundStatusType.RoundEnded, gameClient.getCurrentRoundState().getWinningId());
-            gameClient.sendGlobalCommand(gameClient.peer.getPeerIds(), "RoundStatus", rs.toJson());
-            try { // Send new round status update to dealer
-                gameClient.gameSpace.put("RoundStatus", rs.toJson());
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+        if (gameClient.getCurrentRoundState().getPlayer(peerHand.getId()).getInRound()) { // compare if new best
+            if (peerHand.compareTo(winningHand) > 0) {
+                gameClient.getCurrentRoundState().setWinningHand(peerHand);
+                gameClient.getCurrentRoundState().setWinningId(peerHand.getId());
+                System.out.println("New winning hand, maybe");
+            } else if (peerHand.compareTo(winningHand) == 0) {
+                System.out.println("Tie, between two of the hands");
+                gameClient.getCurrentRoundState().addWinningId(peerHand.getId());
+            } else {
+                System.out.println("Worse hand");
             }
+        }
+        gameClient.getCurrentRoundState().addToTotalHoleCards(peerHand.getId(), peerHand.getHoleCards());
+        gameClient.getCurrentRoundState().incrementHandComparingCount();
+        
+        if (gameClient.getCurrentRoundState().getHandComparingCount() == gameClient.getCurrentRoundState().getPlayers().size()) {  
+            try {
+                GamePhase gpCommand = new GamePhase(getOwnId(), GamePhaseType.Result, null, gameClient.getCurrentRoundState().getTotalHoleCards(), gameClient.getCurrentRoundState().getWinningIds());
+                for(String id : gameClient.peer.getPeerIds()) { // send to all peers, including itself
+                    sendCommand(id, "GamePhase", gpCommand.toJson());
+                }
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(8000); // wait 8 seconds before resetting round
+                        RoundStatus rs = new RoundStatus(getOwnId(), RoundStatusType.RoundEnded, gameClient.getCurrentRoundState().getWinningIds());
+                        gameClient.sendGlobalCommand(gameClient.peer.getPeerIds(), "RoundStatus", rs.toJson());
+                        try { // Send new round status update to dealer
+                            gameClient.gameSpace.put("RoundStatus", rs.toJson());
+                        } catch (InterruptedException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    } catch (Exception e) {}
+                }).start();
+                // have found the winners
+
+            } catch (Exception e) {}
+            
         }   
     }
 
@@ -283,6 +312,7 @@ public class GameCommands{
                 }
                 break;
             case RoundEnded: 
+                System.out.println("Recieved round ending");
                 // split the pot amoung the winning players (simplified)
                 int winning = (gameClient.getCurrentRoundState().getPot() / roundStatus.getWinners().size());
                 for(String id : roundStatus.getWinners()) {
@@ -358,6 +388,19 @@ public class GameCommands{
 
     public void addPlayerToGameState(String playerId, String pName) {
         gameClient.addPlayerToGameState(playerId, pName);
+    }
+
+    public static void delay(long millis, Runnable continuation) {
+        Task<Void> sleeper = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                try { Thread.sleep(millis); }
+                catch (InterruptedException e) { }
+                return null;
+            }
+        };
+        sleeper.setOnSucceeded(event -> continuation.run());
+        new Thread(sleeper).start();
     }
     
     public void clearScreen() {  

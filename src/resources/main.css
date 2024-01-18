@@ -60,7 +60,6 @@
     -fx-background-color:#ad2d1f;
 }
 
-
 .list-view {
     -fx-border-color:#0d5e2a;
     -fx-background-insets: 0;
@@ -70,6 +69,10 @@
 
 .list-view:focused {
     -fx-border-color:#0d5e2a;
+}
+
+.winner {
+    -fx-text-fill: #17ac4d !important; 
 }
 
 .list-cell {

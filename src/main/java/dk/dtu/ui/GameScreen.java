@@ -56,6 +56,7 @@ public class GameScreen {
 	}
 
 	public void makeGraphics() {
+		System.out.println("UPDATEING GRAPHICS");
 		if (chat == null) {
 			chat = new Chat((ChatController)(gameClient.peer.chat), gameClient.peer, 300);
 		}
@@ -66,8 +67,7 @@ public class GameScreen {
 		Player p = rs.getOwnPlayerObject();
 		String nextId = rs.nextPlayer(p.getId());
 		while (!nextId.equals(p.getId())) {
-			System.out.println(nextId);
-			GamePlayer gp = new GamePlayer(rs.getPlayer(nextId), gameClient, null, false);
+			GamePlayer gp = new GamePlayer(rs.getPlayer(nextId), gameClient, null, false, rs.getWinningIds(), rs.getTotalHoleCards());
 			Pane view = gp.getView();
 			view.setLayoutX(100 + i * 270);
 			view.setLayoutY(20);
@@ -75,7 +75,7 @@ public class GameScreen {
 			root.getChildren().add(view);
 			nextId = rs.nextPlayer(nextId);
 		}
-		GamePlayer gpOwn = new GamePlayer(rs.getOwnPlayerObject(), gameClient, rs.getOwnPlayerObject().getHoleCards(), true);
+		GamePlayer gpOwn = new GamePlayer(rs.getOwnPlayerObject(), gameClient, rs.getOwnPlayerObject().getHoleCards(), true, rs.getWinningIds(), null);
 		Pane view = gpOwn.getView();
 		view.setLayoutX(370);
 		view.setLayoutY(screenSize.getHeight() - 200);
