@@ -32,7 +32,6 @@ public class GamePlayer {
             for (String id : winningIds) {
                 if (id.equals(player.getId())) {
                     name.getStyleClass().add("winner");
-                    System.out.println("You won!!!");
                 }
             }
         }

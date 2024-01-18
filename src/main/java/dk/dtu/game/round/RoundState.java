@@ -58,6 +58,10 @@ public class RoundState {
         setAllPlayersInRound();
     }
 
+    public String getOrigLastPlayer() {
+        return ORIG_LAST_PLAYER;
+    }
+
     public void addToTotalHoleCards(String id, List<Card> holeCards) {
         totalHoleCards.put(id, holeCards);
     }

@@ -45,6 +45,7 @@ public class GamePlayerButtons {
             if (!raiseAmount.strip().isEmpty()) {
                 String res = gameClient.gameCommandHandler("/g Raise " + raiseField.getText());
                 if (res != null) gameScreen.showError(res);
+                raiseField.setText("");
             }
         });
 
@@ -52,7 +53,7 @@ public class GamePlayerButtons {
         foldBtn.setLayoutY(110);
         foldBtn.getStyleClass().add("control-fold-button");
         foldBtn.setOnAction(event -> {
-            String res = gameClient.gameCommandHandler("/g Fold" + raiseField.getText());
+            String res = gameClient.gameCommandHandler("/g Fold");
             if (res != null) gameScreen.showError(res);
 		});
 

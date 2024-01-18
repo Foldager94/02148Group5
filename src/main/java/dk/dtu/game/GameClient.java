@@ -7,7 +7,10 @@ import org.jspace.Tuple;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.jspace.FormalField;
 import org.jspace.QueueSpace;
 import org.jspace.RemoteSpace;
@@ -41,6 +44,7 @@ public class GameClient {
     public void initGameCommands() {
         gameCommands = new GameCommands(this);
     }
+
 
     public void startGameCommandReceiver() {
         new Thread(() -> {
@@ -282,20 +286,30 @@ public class GameClient {
         if(winningId != null) { // if the player is the last player who haven't folded
             if (peer.id.equals(getCurrentRoundState().getDealer())) {
                 System.out.println("Last player, end the game!");
-                System.out.println("Last player, end the game!");
-                try {
-                    getCurrentRoundState().addWinningId(winningId);
-                    RoundStatus rs = new RoundStatus(peer.id, RoundStatusType.RoundEnded, getCurrentRoundState().getWinningIds());
-                    sendGlobalCommand(peer.getPeerIds(), "RoundStatus", rs.toJson());
-                    gameSpace.put("RoundStatus", rs.toJson());
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                List<Card> winningCards = gameState.deck.getCardsByIndex(gameState.findPlayerIndexById(winningId));
+                getCurrentRoundState().addToTotalHoleCards(winningId, winningCards);
+                GamePhase gpCommand = new GamePhase(peer.id, GamePhaseType.Result, null, getCurrentRoundState().getTotalHoleCards(), getCurrentRoundState().getWinningIds());
+                for(String id : peer.getPeerIds()) { // send to all peers, including itself
+                    sendCommand(id, "GamePhase", gpCommand.toJson());
                 }
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(5000); // wait 5 seconds before resetting round
+                        RoundStatus rs = new RoundStatus(peer.id, RoundStatusType.RoundEnded, getCurrentRoundState().getWinningIds());
+                        sendGlobalCommand(peer.getPeerIds(), "RoundStatus", rs.toJson());
+                        try { // Send new round status update to dealer
+                            gameSpace.put("RoundStatus", rs.toJson());
+                        } catch (InterruptedException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    } catch (Exception e) {}
+                }).start();
             }
         }
         return null;
     }
+
 
     public String makeCheckAction(){
         RoundState currentRoundState = getCurrentRoundState();

@@ -1,5 +1,8 @@
 package dk.dtu.game;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.jspace.Tuple;
 import dk.dtu.game.commands.Action;
 import dk.dtu.game.commands.enums.ConnectionStatusType;
@@ -52,22 +55,27 @@ public class GameCommands{
                     gameClient.getCurrentRoundState().setNewFirstPlayer(action.getSenderId());
                     System.out.println("New first player: " + gameClient.getCurrentRoundState().getFirstPlayerId());
                 }
-                if (gameClient.isLastPlayer(action.getSenderId())) {
-                    gameClient.getCurrentRoundState().updateLastPlayer();
-                    updateLast = true;
-                }
                 String winningId = gameClient.isOnlyOnePlayer();
+
+                if (gameClient.isLastPlayer(action.getSenderId())) {
+                    updateLast = true;
+                    if (gameClient.getCurrentRoundState().getOrigLastPlayer().equals(action.getSenderId())) { // if the actual last
+                        gameClient.getCurrentRoundState().updateLastPlayer();
+                    }
+                }
                 if (winningId != null) { 
                     // Have not looked at this part yet.
                     if (isDealer()) {
                         gameClient.getCurrentRoundState().addWinningId(winningId); // cannot get the cards of the winner, but who cares
+                        List<Card> winningCards = gameClient.gameState.deck.getCardsByIndex(gameClient.gameState.findPlayerIndexById(winningId));
+                        gameClient.getCurrentRoundState().addToTotalHoleCards(winningId, winningCards);
                         GamePhase gpCommand = new GamePhase(getOwnId(), GamePhaseType.Result, null, gameClient.getCurrentRoundState().getTotalHoleCards(), gameClient.getCurrentRoundState().getWinningIds());
                         for(String id : gameClient.peer.getPeerIds()) { // send to all peers, including itself
                             sendCommand(id, "GamePhase", gpCommand.toJson());
                         }
                         new Thread(() -> {
                             try {
-                                Thread.sleep(4000); // wait 8 seconds before resetting round
+                                Thread.sleep(5000); // wait 5 seconds before resetting round
                                 RoundStatus rs = new RoundStatus(getOwnId(), RoundStatusType.RoundEnded, gameClient.getCurrentRoundState().getWinningIds());
                                 gameClient.sendGlobalCommand(gameClient.peer.getPeerIds(), "RoundStatus", rs.toJson());
                                 try { // Send new round status update to dealer

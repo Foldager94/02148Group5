@@ -56,7 +56,6 @@ public class GameScreen {
 	}
 
 	public void makeGraphics() {
-		System.out.println("UPDATEING GRAPHICS");
 		if (chat == null) {
 			chat = new Chat((ChatController)(gameClient.peer.chat), gameClient.peer, 300);
 		}

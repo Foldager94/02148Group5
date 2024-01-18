@@ -16,11 +16,16 @@ public class Deck {
             }
         }
         shuffle();
-    }    
+    }
 
     public void shuffle() {
         usedCards = 0;
 		Collections.shuffle(cards);
+    }
+
+    public List<Card> getCardsByIndex(int index) {
+        return cards.subList(cards.size() - (2 * (index + 1)), cards.size() - (2 * index));
+
     }
 
     public List<Card> draw(int nCards) {
